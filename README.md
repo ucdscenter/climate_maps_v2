@@ -7,9 +7,9 @@ Copy 2010 census tract jsons into `public/data/census_tracts_geojson\2010`
 
 Run `npm i` in the project directory
 
-### Creating .env.local file
+### Creating .env file
 
-Create a `.env.local` file in the root directory and add the following key(s) in it:
+Create a `.env` file in the root directory and add the following key(s) in it:
     REACT_APP_MAPBOX_API_KEY="Your mapbox key"
 
 ## Available Scripts
