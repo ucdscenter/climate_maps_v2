@@ -2,7 +2,7 @@
 
 ### Loading JSON Files (temporary step/ optional if tileserver is active)
 
-Copy 2010 census tract jsons into `public/data/census_tracts_geojson\2010` 
+Copy 2010 census tract jsons into `public/data/census_tracts_geojson/2010` 
 ### Installing packages
 
 Run `npm i` in the project directory
