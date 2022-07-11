@@ -14,26 +14,14 @@ function Map() {
   mapboxgl.accessToken = process.env.REACT_APP_MAPBOX_API_KEY;
   const mapContainer = useRef(null);
   const map = useRef(null);
-  const [lng, setLng] = useState(-70.9);
-  const [lat, setLat] = useState(42.35);
-  const [zoom, setZoom] = useState(5);
+  const [lng, setLng] = useState(-93.9);
+  const [lat, setLat] = useState(40.35);
+  const [zoom, setZoom] = useState(3.5);
   // const years = [];
   // const variables = [];
   const [showMenu, setShowMenu] = useState(0);
   useEffect(() => {
     // TODO: Remove commented code after testing
-    // const gs = fetch('http://localhost:3000/data/census_tracts_geojson/2010/2010_moststates.json').then((res) => res.json()).then(data => {
-    // let i = 0;
-    // data.features.forEach(feature => {
-    //   feature.properties.year = 2010;
-    // });
-    // var fileData = JSON.stringify(data);
-    // const blob = new Blob([fileData], { type: "text/plain" });
-    // const url = URL.createObjectURL(blob);
-    // const link = document.createElement('a');
-    // link.download = 'filename.json';
-    // link.href = url;
-    // link.click();
 
     if (map.current) return; // initialize map only once
 
@@ -44,6 +32,12 @@ function Map() {
       zoom: zoom
     });
     console.log('map', map)
+
+    let reds = d3.interpolateOranges
+    let extent = d3.extent([57784.48597, 6013.719748])
+    let colorScale = d3.scaleLinear().domain(extent).range([0, 1])
+    console.log(reds(colorScale(extent[0])))
+    console.log(reds(colorScale(extent[1])))
     map.current.on('load', () => {
       // Add a data source containing GeoJSON data.
       map.current.addSource("parcels", {
@@ -61,136 +55,37 @@ function Map() {
         "source-layer": "censustracts",
         paint: {
           'fill-color': [
-            'step',
-            ['get', 'id'],
-            '#51bbd6',
-            100,
-            '#f1f075',
-            200,
-            '#f28cb1'
+            'interpolate',
+            ['linear'],
+            ['get', 'TOTAL'],
+            6013,
+            ['to-color', '#FFFFFF'],
+            57785,
+            ['to-color', '#FF0000']
           ],
-          "fill-opacity": 0.5,
+          "fill-opacity": .8,
           "fill-outline-color": "black"
         },
         'minzoom': 2,
-        'maxzoom': 13
+        'maxzoom': 13,
       });
 
 
-
-      // map.current.addSource('US_01', {
-      //   'type': 'geojson',
-      //   'data': data//'http://localhost:3000/data/census_tracts_geojson/2010/2010_moststates.json'
-      // });
-      // map.current.addSource('US_02', {
-      //   'type': 'geojson',
-      //   'data': 'http://localhost:3000/data/census_tracts_geojson/2010/2010_remainingstates.json'
-      // });
-      // map.current.addSource('US_03', {
-      //   'type': 'geojson',
-      //   'data': 'http://localhost:3000/data/census_tracts_geojson/2010/2010_layererrorstates.json'
-      // });
-
-      // // Add a new layer to visualize the polygon.
-      // map.current.addLayer({
-      //   'id': 'US_01',
-      //   'type': 'fill',
-      //   'source': 'US_01',
-      //   'layout': {},
-      //   'paint': {
-      //     'fill-color': [
-      //       'step',
-      //       ['get', 'store'],
-      //       '#51bbd6',
-      //       10000,
-      //       '#f1f075',
-      //       20000,
-      //       '#f28cb1'
-      //     ],
-      //     'fill-opacity': 0.4
-      //   }
-      // });
-      // map.current.addLayer({
-      //   'id': 'US_02',
-      //   'type': 'fill',
-      //   'source': 'US_02', 
-      //   'layout': {},
-      //   'paint': {
-      //     'fill-color': '#0080ff',
-      //     'fill-opacity': 0.4
-      //   }
-      // });
-      // map.current.addLayer({
-      //   'id': 'US_03',
-      //   'type': 'fill',
-      //   'source': 'US_03', 
-      //   'layout': {},
-      //   'paint': {
-      //     'fill-color': '#0080ff',
-      //     'fill-opacity': 0.4
-      //   }
-      // });
-      // // Add a black outline around the polygon.
-      // map.current.addLayer({
-      //   'id': 'outline_01',
-      //   'type': 'line',
-      //   'source': 'US_01',
-      //   'layout': {},
-      //   'paint': {
-      //     'line-color': '#000',
-      //     'line-width': 0.2
-      //   }
-      // });
-      // map.current.addLayer({
-      //   'id': 'outline_02',
-      //   'type': 'line',
-      //   'source': 'US_02',
-      //   'layout': {},
-      //   'paint': {
-      //     'line-color': '#000',
-      //     'line-width': 0.2
-      //   }
-      // });
-      // map.current.addLayer({
-      //   'id': 'outline_03',
-      //   'type': 'line',
-      //   'source': 'US_03',
-      //   'layout': {},
-      //   'paint': {
-      //     'line-color': '#000',
-      //     'line-width': 0.2
-      //   }
-      // });
       map.current.addControl(new mapboxgl.NavigationControl());
-      // });
+
     });
   });
 
-  // const onMenuClick = () => {
-  //   setShowMenu(!showMenu)
-  //   map.current.setPaintProperty('parcels-fill', 'fill-color', [
-  //     'step',
-  //     ['get', 'store'],
-  //     '#51bbd6',
-  //     1000,
-  //     '#f1f075',
-  //     2000,
-  //     '#f28cb1'
-  //   ]);
-  // };
-
-  // for (let i = 2010; i < 2022; i++) {
-  //   years.push(<a key={i} id={i} href='#' className='active'>{i}</a>);
-  // }
-  // for (let i = 0; i < 5; i++) {
-  //   variables.push(<a key={i} id={i} href='#' className='active'>{i}</a>)
-  // }
 
   return (
     <div>
-      <div ref={mapContainer} className='map-container' />
-      <Menu map={map}></Menu>
-      <Charts></Charts>
+
+      <div ref={mapContainer} className='map-container'>
+       <Menu map={map}></Menu>
+       <Charts></Charts>
+       </div>
+     
+      
     </div>
   );
 }

@@ -1,5 +1,5 @@
-@import "bootstrap/dist/css/bootstrap.css";
-
+/*@import "bootstrap/dist/css/bootstrap.css";*/
+@import '../node_modules/bootstrap/dist/css/bootstrap.min.css';
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
@@ -15,7 +15,9 @@ code {
 }
 
 .map-container {
-  height: 100vh;
+  margin: 1rem;
+  margin-top:  0px;
+  height: 90vh;
 }
 
 #menu {
@@ -61,6 +63,7 @@ code {
 }
 
 .top-left {
+  position: relative;
   top: 10px;
   left: 10px;
 }
@@ -76,5 +79,6 @@ code {
 }
 
 .bottom-center {
+  left: 10px;
   bottom:10px;
 }
