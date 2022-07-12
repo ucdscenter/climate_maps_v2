@@ -1,5 +1,16 @@
 ## Setup
 
+### Backend Steps
+1. Add the mbtiles file to s3 bucket
+2. Build and tag docker image by replacing url and file name in the Dockerfile of the forked tileserver repo
+    Optional step if token has expired: `(Get-ECRLoginCommand).Password | docker login --username AWS --password-stdin ecr_repo_url.com`
+    `docker build -t climate-maps-tileserver .`
+    `docker tag climate-maps-tileserver:latest ecr_repo_url.com/climate-maps-tileserver:latest`
+3. Push the container to ECR
+    `docker push ecr_repo_url/climate-maps-tileserver:latest`
+4. Modify userdata script in ec2 instance if file name has changed.
+5. Start the instance
+
 ### Loading JSON Files (temporary step/ optional if tileserver is active)
 
 Copy 2010 census tract jsons into `public/data/census_tracts_geojson/2010` 
