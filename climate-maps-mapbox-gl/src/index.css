@@ -25,7 +25,7 @@ code {
   top: 15px; 
   left: 60px; 
   border-radius: 3px;
-  width: 120px;
+  /* width: 120px; */
   border: 1px solid rgba(0, 0, 0, 0.4);
   font-family: 'Open Sans', sans-serif;
 }
@@ -40,6 +40,13 @@ code {
   text-decoration: none;
   border-bottom: 1px solid rgba(0, 0, 0, 0.25);
   text-align: center;
+}
+
+.legend {
+  top: 15px; 
+  left: 60px; 
+  border-radius: 3px;
+  display: block;
 }
 
 #menu a:last-child {
