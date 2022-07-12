@@ -47,3 +47,24 @@ Your app is ready to be deployed!
 ### `npm run deploy 's3_url'`
 
 This command will push the build folder to s3 bucket.
+
+
+
+### For running  tileserver
+`docker run --rm -it -v $(pwd):/data -p 8080:80 maptiler/tileserver-gl `
+
+run docker/tileserver command from folder where mbtiles files are stored.
+https://github.com/maptiler/tileserver-gl
+
+### For creating mbtiles files
+
+https://github.com/mapbox/tippecanoe
+
+install with brew. update
+
+run with either 
+`tippecanoe -zg -o out.mbtiles --drop-densest-as-needed in.geojson`
+
+or 
+
+`tippecanoe -o file.mbtiles [options] [file.json file.json.gz file.geobuf ...]`

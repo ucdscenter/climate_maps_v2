@@ -1,3 +1,4 @@
+import React, { Component }  from 'react';
 import * as d3 from 'd3';
 import { useEffect, useRef } from 'react';
 export function drawChart(height, width) {
@@ -9,7 +10,7 @@ export function drawChart(height, width) {
         .style("background-color", "white")
         .append("text")
         .attr("fill", "green")
-        .attr("x", 50)
+        .attr("x", 10)
         .attr("y", 50)
         .text("Sample Visualizations")
 }
@@ -21,7 +22,7 @@ function Charts(props) {
     useEffect(() => {
         console.log('firing')
         if (isInitialRender.current) {
-            drawChart(300, 400);
+            drawChart(70, 150);
             isInitialRender.current = false;
         }
     }, []);
