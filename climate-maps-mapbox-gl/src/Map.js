@@ -17,6 +17,7 @@ function Map() {
   const [lng, setLng] = useState(-70.9);
   const [lat, setLat] = useState(42.35);
   const [zoom, setZoom] = useState(5);
+
   // const years = [];
   // const variables = [];
   const [showMenu, setShowMenu] = useState(0);
@@ -43,10 +44,10 @@ function Map() {
       center: [lng, lat],
       zoom: zoom
     });
-    console.log('map', map)
+
     map.current.on('load', () => {
       // Add a data source containing GeoJSON data.
-      map.current.addSource("parcels", {
+      map.current.addSource("2018_emissions", {
         type: "vector",
         tiles: [
           `${process.env.REACT_APP_TILES_URL}/data/${process.env.REACT_APP_TILES_NAME}/{z}/{x}/{y}.pbf`
@@ -55,14 +56,14 @@ function Map() {
       });
 
       map.current.addLayer({
-        id: "parcels-fill",
+        id: "2018_emissions_fill",
         type: "fill",
-        source: "parcels",
+        source: "2018_emissions",
         "source-layer": "censustracts",
         paint: {
           'fill-color': [
             'step',
-            ['get', 'id'],
+            ['get', 'TOTAL'],
             '#51bbd6',
             100,
             '#f1f075',
@@ -75,16 +76,16 @@ function Map() {
         'minzoom': 2,
         'maxzoom': 13
       });
-
-
+      
+      
 
       // map.current.addSource('US_01', {
       //   'type': 'geojson',
-      //   'data': data//'http://localhost:3000/data/census_tracts_geojson/2010/2010_moststates.json'
+      //   'data': 'http://localhost:3000/data/census_tracts_geojson/2010/2010_moststates_1.json'
       // });
       // map.current.addSource('US_02', {
       //   'type': 'geojson',
-      //   'data': 'http://localhost:3000/data/census_tracts_geojson/2010/2010_remainingstates.json'
+      //   'data': 'http://localhost:3000/data/census_tracts_geojson/2010/2010_AllStates.json'
       // });
       // map.current.addSource('US_03', {
       //   'type': 'geojson',
@@ -100,11 +101,11 @@ function Map() {
       //   'paint': {
       //     'fill-color': [
       //       'step',
-      //       ['get', 'store'],
+      //       ['get', 'TOTAL'],
       //       '#51bbd6',
-      //       10000,
+      //       50,
       //       '#f1f075',
-      //       20000,
+      //       100,
       //       '#f28cb1'
       //     ],
       //     'fill-opacity': 0.4
