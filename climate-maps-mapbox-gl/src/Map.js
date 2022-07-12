@@ -17,11 +17,8 @@ function Map() {
   const [lng, setLng] = useState(-93.9);
   const [lat, setLat] = useState(40.35);
   const [zoom, setZoom] = useState(3.5);
-  // const years = [];
-  // const variables = [];
   const [showMenu, setShowMenu] = useState(0);
   useEffect(() => {
-    // TODO: Remove commented code after testing
 
     if (map.current) return; // initialize map only once
 
@@ -54,20 +51,12 @@ function Map() {
         source: "2018_emissions",
         "source-layer": "censustracts",
         paint: {
-          'fill-color': [
-            'interpolate',
-            ['linear'],
-            ['get', 'TOTAL'],
-            6013,
-            ['to-color', '#FFFFFF'],
-            57785,
-            ['to-color', '#FF0000']
-          ],
-          "fill-opacity": .8,
-          "fill-outline-color": "black"
+          'line-color': '#000',
+          'line-width': 0.2
         },
         'minzoom': 2,
         'maxzoom': 13,
+        filter: ["has", 'TOTAL']
       });
 
 
@@ -81,11 +70,11 @@ function Map() {
     <div>
 
       <div ref={mapContainer} className='map-container'>
-       <Menu map={map}></Menu>
-       <Charts></Charts>
-       </div>
-     
-      
+        <Menu map={map}></Menu>
+        <Charts></Charts>
+      </div>
+
+
     </div>
   );
 }
