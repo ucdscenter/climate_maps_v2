@@ -7,7 +7,7 @@ function Menu({ show, map }) {
 
     const years = [<option key='2018' value='2018' id='2018' href='#' className='active'>2018</option>];
     let year = '2018';
-    let variable = 'TOTAL';
+    let variable = 'FOODHOME_LN';
     const isInitialRender = useRef(true);
     const variables = ['FOODHOME_LN', 'FOODAWAY', 'ALCBEV', 'OWNDWE',
         'RENTDWE', 'OTHLOD', 'UTIL', 'HOUSOP', 'HOUKEEP', 'HOUSEQ', 'APPR',
@@ -24,7 +24,7 @@ function Menu({ show, map }) {
             return;
         if (isInitialRender.current) {
             isInitialRender.current = false;
-            setInterval(() =>
+            setTimeout(() =>
                 onMenuClick(), 1000);
         }
     });
