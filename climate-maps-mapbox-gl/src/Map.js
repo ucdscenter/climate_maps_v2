@@ -46,7 +46,8 @@ function Map() {
         "source-layer": "censustracts",
         paint: {
           'fill-color': 'transparent',
-          'fill-opacity': 0.7
+
+          'fill-opacity': 0.8
         },
         'minzoom': 2,
         'maxzoom': 13,
@@ -59,7 +60,7 @@ function Map() {
         console.log(e.features)
         new mapboxgl.Popup()
           .setLngLat(e.lngLat)
-          .setHTML(e.features[0].properties.TOTAL)
+          .setHTML(e.features[0].properties.GEOID10)
           .addTo(map.current);
       });
 
