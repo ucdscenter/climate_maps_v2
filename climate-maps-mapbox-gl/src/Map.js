@@ -17,9 +17,8 @@ function Map() {
   const [lng, setLng] = useState(-93.9);
   const [lat, setLat] = useState(40.35);
   const [zoom, setZoom] = useState(3.5);
-  const [showMenu, setShowMenu] = useState(0);
+  const [showMenu, setShowMenu] = useState(false);
   useEffect(() => {
-
     if (map.current) return; // initialize map only once
 
     map.current = new mapboxgl.Map({
@@ -33,8 +32,6 @@ function Map() {
     let reds = d3.interpolateOranges
     let extent = d3.extent([57784.48597, 6013.719748])
     let colorScale = d3.scaleLinear().domain(extent).range([0, 1])
-    console.log(reds(colorScale(extent[0])))
-    console.log(reds(colorScale(extent[1])))
     map.current.on('load', () => {
       // Add a data source containing GeoJSON data.
       map.current.addSource("2018_emissions", {
@@ -51,16 +48,36 @@ function Map() {
         source: "2018_emissions",
         "source-layer": "censustracts",
         paint: {
-          'line-color': '#000',
-          'line-width': 0.2
+          'fill-color': 'transparent',
+          'fill-opacity': 1.0
         },
         'minzoom': 2,
         'maxzoom': 13,
         filter: ["has", 'TOTAL']
       });
 
-
+     
       map.current.addControl(new mapboxgl.NavigationControl());
+      map.current.on('click', '2018_emissions_fill', (e) => {
+        console.log(e.features)
+        new mapboxgl.Popup()
+          .setLngLat(e.lngLat)
+          .setHTML(e.features[0].properties.TOTAL)
+          .addTo(map.current);
+      });
+
+      map.current.on('mouseenter', 'states-layer', () => {
+        map.current.getCanvas().style.cursor = 'pointer';
+      });
+
+      map.current.on('mouseleave', 'states-layer', () => {
+        map.getCanvas().style.cursor = '';
+      });
+
+      map.current.on('idle', function () {
+        if (!showMenu)
+          setShowMenu(!showMenu);
+      })
 
     });
   });
@@ -70,7 +87,7 @@ function Map() {
     <div>
 
       <div ref={mapContainer} className='map-container'>
-        <Menu map={map}></Menu>
+        <Menu show={showMenu} map={map}></Menu>
         <Charts></Charts>
       </div>
 
