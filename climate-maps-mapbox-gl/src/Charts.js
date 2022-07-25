@@ -20,7 +20,6 @@ function Charts(props) {
     // const [data, setData] = useState([]);
     const renderedCharts = false;
     useEffect(() => {
-        console.log('firing')
         if (isInitialRender.current) {
             drawChart(70, 150);
             isInitialRender.current = false;

@@ -1,5 +1,5 @@
 import './App.css';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import * as d3 from 'd3';
 import emissions_range from './emissions_range.json';
 
@@ -8,6 +8,7 @@ function Menu({ show, map }) {
     const years = [<option key='2018' value='2018' id='2018' href='#' className='active'>2018</option>];
     let year = '2018';
     let variable = 'TOTAL';
+    const isInitialRender = useRef(true);
     const variables = ['FOODHOME_LN', 'FOODAWAY', 'ALCBEV', 'OWNDWE',
         'RENTDWE', 'OTHLOD', 'UTIL', 'HOUSOP', 'HOUKEEP', 'HOUSEQ', 'APPR',
         'VEHPUR', 'GASOIL', 'OTHVEH', 'PUBTRAN', 'HEALTH', 'ENTER', 'PERCARE',
@@ -21,8 +22,11 @@ function Menu({ show, map }) {
     useEffect(() => {
         if (!show)
             return;
-        setInterval(() =>
-            onMenuClick(), 1000);
+        if (isInitialRender.current) {
+            isInitialRender.current = false;
+            setInterval(() =>
+                onMenuClick(), 1000);
+        }
     });
     const onMenuClick = () => {
         if (map.current)
@@ -46,7 +50,7 @@ function Menu({ show, map }) {
         const [range, layerName] = [emissionsRange[year][variable], `${year}_emissions_fill`];
         const colorscale = [];
         for (let i = 0; i <= 10; i++) {
-            colorscale.push(d3.interpolateReds(i / 10));
+            colorscale.push(d3.interpolateGreys(i / 10));
         }
         const style = ['interpolate',
             ['linear'],
@@ -69,8 +73,9 @@ function Menu({ show, map }) {
         map.current.setPaintProperty(layerName, 'fill-color', style);
 
         setEmissionsLegend(emissionsLegend);
-        if (!showLegend)
+        if (!showLegend) {
             setShowLegend(!showLegend);
+        }
 
     }
     for (let i = 1980; i <= 2020; i += 10) {

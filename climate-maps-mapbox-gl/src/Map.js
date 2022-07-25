@@ -29,9 +29,6 @@ function Map() {
     });
     console.log('map', map)
 
-    let reds = d3.interpolateOranges
-    let extent = d3.extent([57784.48597, 6013.719748])
-    let colorScale = d3.scaleLinear().domain(extent).range([0, 1])
     map.current.on('load', () => {
       // Add a data source containing GeoJSON data.
       map.current.addSource("2018_emissions", {
@@ -49,14 +46,14 @@ function Map() {
         "source-layer": "censustracts",
         paint: {
           'fill-color': 'transparent',
-          'fill-opacity': 1.0
+          'fill-opacity': 0.7
         },
         'minzoom': 2,
         'maxzoom': 13,
         filter: ["has", 'TOTAL']
       });
 
-     
+
       map.current.addControl(new mapboxgl.NavigationControl());
       map.current.on('click', '2018_emissions_fill', (e) => {
         console.log(e.features)
