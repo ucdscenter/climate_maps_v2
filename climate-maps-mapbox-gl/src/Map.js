@@ -100,8 +100,8 @@ function Map() {
             center: [cords.lng, cords.lat],
             zoom: 8,
             duration: 2000,
-            essential: true
-            // pitch: 45,
+            essential: true,
+            pitch: 45,
           });
           new mapboxgl.Popup()
             .setLngLat(cords)
