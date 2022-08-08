@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import * as d3 from 'd3';
 import emissions_range from './emissions_range.json';
 
-function Menu({ show, map }) {
+function Menu({ show, map, cityCordinates }) {
 
     const years = [<option key='2018' value='2018' id='2018' href='#' className='active'>2018</option>];
     let year = '2018';
@@ -14,8 +14,12 @@ function Menu({ show, map }) {
         'VEHPUR', 'GASOIL', 'OTHVEH', 'PUBTRAN', 'HEALTH', 'ENTER', 'PERCARE',
         'READING', 'EDUC', 'TABACC', 'MISCELL', 'CASHCON', 'PERINC', 'VMT',
         'VMT_CO2', 'FOOD', 'HOUSING', 'TRANSPORT', 'GOODS', 'SERVICE', 'TOTAL'];
+    const cities = ['-', 'Atlanta, GA', 'Boston, MA--NH--RI', 'Chicago, IL--IN', 'Cincinnati, OH--KY--IN',
+        'Cleveland, OH', 'Dallas--Fort Worth--Arlington, TX', 'Denver--Aurora, CO', 'Houston, TX', 'Los Angeles--Long Beach--Anaheim, CA', 'Minneapolis--St. Paul, MN--WI',
+        'Philadelphia, PA', 'Portland, OR--WA', 'St. Louis, MO--IL']
     const emissionsRange = emissions_range;
     const variablesList = [];
+    const citiesList = [];
     const getBackgroundColor = (color) => { return { "backgroundColor": color } };
     const [showLegend, setShowLegend] = useState(0);
     const [emissionsLegend, setEmissionsLegend] = useState([]);
@@ -44,7 +48,28 @@ function Menu({ show, map }) {
 
         setPaintProperty(year, variable);
     };
+    const onCityClick = (e) => {
+        const city = e.target.value;
+        if (city == '-') {
+            map.current.flyTo({
+                center: [-93.9, 40.35],
+                zoom: 3.5,
+                pitch: 0,
+                duration: 2000,
+                essential: true
+            });
+            return;
+        }
 
+        const cords = cityCordinates[city];
+        map.current.flyTo({
+            center: [cords.lng, cords.lat],
+            zoom: 8,
+            pitch: 45,
+            duration: 2000,
+            essential: true
+        });
+    };
     const setPaintProperty = (year, variable) => {
         let emissionsLegend = [<div key="no-data"><span style={getBackgroundColor('#ffffff')}></span>No Data</div>];
         const [range, layerName] = [emissionsRange[year][variable], `${year}_emissions_fill`];
@@ -84,6 +109,10 @@ function Menu({ show, map }) {
 
     variables.forEach((variable, i) =>
         variablesList.push(<option key={variable} value={variable} id={i} href='#' className='active'>{variable}</option>));
+
+    cities.forEach((city, i) =>
+        citiesList.push(<option key={city} value={city} id={i} href='#' className='active'>{city}</option>));
+
     if (!show)
         return null;
     return (
@@ -101,6 +130,12 @@ function Menu({ show, map }) {
                         <label htmlFor="variables">Select a variable:</label>
                         <select name="variables" id="variables" onChange={onVariableClick}>
                             {variablesList}
+                        </select>
+                    </div>
+                    <div>
+                        <label htmlFor="citie">Select a city:</label>
+                        <select name="cities" id="cities" onChange={onCityClick}>
+                            {citiesList}
                         </select>
                     </div>
                 </div>
