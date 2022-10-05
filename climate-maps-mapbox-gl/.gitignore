@@ -9,6 +9,8 @@
 # production
 /build
 /public/data/census_tracts_geojson
+/public/data/chart_data
+/devops
 
 # misc
 .DS_Store

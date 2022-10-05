@@ -3,17 +3,14 @@ import React, { useState, useEffect, useRef } from 'react';
 import * as d3 from 'd3';
 import emissions_range from './emissions_range.json';
 
-function Menu({ show, map, cityCordinates }) {
+function Menu({ show, map, cityCordinates, setVariable, setCity }) {
 
     const years = [<option key='2018' value='2018' id='2018' href='#' className='active'>2018</option>];
     let year = '2018';
-    let variable = 'FOODHOME_LN';
+    let variable = 'FOOD';
     const isInitialRender = useRef(true);
-    const variables = ['FOODHOME_LN', 'FOODAWAY', 'ALCBEV', 'OWNDWE',
-        'RENTDWE', 'OTHLOD', 'UTIL', 'HOUSOP', 'HOUKEEP', 'HOUSEQ', 'APPR',
-        'VEHPUR', 'GASOIL', 'OTHVEH', 'PUBTRAN', 'HEALTH', 'ENTER', 'PERCARE',
-        'READING', 'EDUC', 'TABACC', 'MISCELL', 'CASHCON', 'PERINC', 'VMT',
-        'VMT_CO2', 'FOOD', 'HOUSING', 'TRANSPORT', 'GOODS', 'SERVICE', 'TOTAL'];
+
+    const variables = ['FOOD', 'HOUSING', 'TRANSPORT', 'GOODS', 'SERVICE', 'TOTAL'];
     const cities = ['-', 'Atlanta, GA', 'Boston, MA--NH--RI', 'Chicago, IL--IN', 'Cincinnati, OH--KY--IN',
         'Cleveland, OH', 'Dallas--Fort Worth--Arlington, TX', 'Denver--Aurora, CO', 'Houston, TX', 'Los Angeles--Long Beach--Anaheim, CA', 'Minneapolis--St. Paul, MN--WI',
         'Philadelphia, PA', 'Portland, OR--WA', 'St. Louis, MO--IL']
@@ -28,6 +25,7 @@ function Menu({ show, map, cityCordinates }) {
             return;
         if (isInitialRender.current) {
             isInitialRender.current = false;
+            setVariable(variable)
             setTimeout(() =>
                 onMenuClick(), 1000);
         }
@@ -41,16 +39,18 @@ function Menu({ show, map, cityCordinates }) {
             return;
 
         variable = e.target.value;
+        setVariable(variable);
         setPaintProperty(year, variable);
     };
     const onYearClick = (e) => {
-        year = '2018' //e.target.value;
+        year = e.target.value;
 
         setPaintProperty(year, variable);
     };
     const onCityClick = (e) => {
         const city = e.target.value;
-        if (city == '-') {
+        if (city === '-') {
+            setCity(null);
             map.current.flyTo({
                 center: [-93.9, 40.35],
                 zoom: 3.5,
@@ -60,12 +60,11 @@ function Menu({ show, map, cityCordinates }) {
             });
             return;
         }
-
+        setCity(city);
         const cords = cityCordinates[city];
         map.current.flyTo({
             center: [cords.lng, cords.lat],
             zoom: 8,
-            pitch: 45,
             duration: 2000,
             essential: true
         });
@@ -117,11 +116,17 @@ function Menu({ show, map, cityCordinates }) {
         return null;
     return (
         <div className={show ? undefined : 'hide'}>
-            <img id='menu-icon' className='top-left over-map' onClick={onMenuClick.bind(this)} src='/menu-squared-48.png'></img>
+            <img id='menu-icon' className='top-left over-map' onClick={onMenuClick.bind(this)} src='/menu-squared-48.png' alt='Menu'></img>
             <nav id='menu' className={`top-left over-map`}>
                 <div>
                     <div>
-                        <label htmlFor="years">Select a year:</label>
+                        <label htmlFor="years">Select a base year:</label>
+                        <select name="years" id="years" onChange={onYearClick}>
+                            {years}
+                        </select>
+                    </div>
+                    <div>
+                        <label htmlFor="years">Select a comparision year:</label>
                         <select name="years" id="years" onChange={onYearClick}>
                             {years}
                         </select>
