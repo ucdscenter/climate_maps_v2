@@ -101,7 +101,9 @@ function Menu({ show, map, cityCordinates, setVariable, setCity }) {
             setShowLegend(!showLegend);
         }
 
-    }
+    }//setPaintProperty
+
+
     for (let i = 1980; i <= 2020; i += 10) {
         years.push(<option key={i} value={i} id={i} href='#' className='active'>{i}</option>);
     }
