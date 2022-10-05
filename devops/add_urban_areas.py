@@ -1,6 +1,6 @@
 import json
 city_names = {}
-intersection = json.load(open(r'D:\University of Cincinnati\Digital Scholarship Center\Climate Race v2\climate_maps_v2\devops\2010_intersection_fixed_geometries.geojson'))
+intersection = json.load(open(r'devops\2010_intersection_fixed_geometries.geojson'))
 for feat in intersection['features']:
     city_names[feat['properties']['GEOID10']] = feat['properties']['NAME10_2']
 final_json = { 'type':'FeatureCollection','name':'2010_AllStates', 'features':[] }

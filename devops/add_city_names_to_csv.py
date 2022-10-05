@@ -5,7 +5,7 @@ import os
 
 script_dir = os.path.dirname(__file__)
 city_names = {}
-intersection = json.load(open(r'D:\University of Cincinnati\Digital Scholarship Center\Climate Race v2\climate_maps_v2\devops\2010_intersection_fixed_geometries.geojson'))
+intersection = json.load(open(r'devops\2010_intersection_fixed_geometries.geojson'))
 for feat in intersection['features']:
     city_names[int(feat['properties']['GEOID10'])] = feat['properties']['NAME10_2']
 
