@@ -27,7 +27,6 @@ function Map() {
   const csv = useRef(null);
   const variable = useRef('FOOD');
   // const [variable, setVariable] = useState(null);
-  console.log('executing')
 
   const updateVariable = useRef((v) => { variable.current = v; console.log('set state of variable', v) });
   const updateCsv = useRef((data) => { console.log('csv', csv); csv.current = data });
@@ -72,18 +71,17 @@ function Map() {
       });
 
       map.current.addLayer({
-        id: "2018_emissions_fill",
+        id: "all_decades_emissions_fill",
         type: "fill",
         source: "2018_emissions",
         "source-layer": "censustracts",
         paint: {
           'fill-color': 'transparent',
-
           'fill-opacity': 0.8
         },
         'minzoom': 2,
         'maxzoom': 13,
-        filter: ["has", '2018']
+        filter: ["has", 'GEOID10']
       });
 
 
@@ -109,7 +107,8 @@ function Map() {
 
       map.current.addControl(new mapboxgl.NavigationControl());
 
-      map.current.on('click', ['2018_emissions_fill', '2018_emissions_outlines_cities'], (e) => {
+      map.current.on('click', ['all_decades_emissions_fill', '2018_emissions_outlines_cities'], (e) => {
+        console.log(e.features[0])
         const cityName = e.features[0].properties.CITYNAME;
         const variableValue = e.features[0].properties[variable.current]
         const isUrbanArea = cities.includes(cityName);
@@ -137,7 +136,7 @@ function Map() {
         }
       });
 
-      map.current.on('mousemove', ['2018_emissions_outlines_cities', '2018_emissions_fill'], (e, x) => {
+      map.current.on('mousemove', ['2018_emissions_outlines_cities', 'all_decades_emissions_fill'], (e, x) => {
         if (e.features.length > 0 && e.features[0].properties) {
           // if (hoveredTract !== null) {
           //   map.setFeatureState(
@@ -153,11 +152,11 @@ function Map() {
         }
       });
 
-      map.current.on('mouseenter', ['2018_emissions_outlines_cities', '2018_emissions_fill'], () => {
+      map.current.on('mouseenter', ['2018_emissions_outlines_cities', 'all_decades_emissions_fill'], () => {
         map.current.getCanvas().style.cursor = 'pointer';
       });
 
-      map.current.on('mouseleave', ['2018_emissions_outlines_cities', '2018_emissions_fill'], () => {
+      map.current.on('mouseleave', ['2018_emissions_outlines_cities', 'all_decades_emissions_fill'], () => {
         map.current.getCanvas().style.cursor = '';
       });
 
