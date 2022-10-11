@@ -81,7 +81,7 @@ function Map() {
         },
         'minzoom': 2,
         'maxzoom': 13,
-        filter: ["has", 'GEOID10']
+        // filter: ["has", 'GEOID10']
       });
 
 

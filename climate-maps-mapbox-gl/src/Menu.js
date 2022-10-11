@@ -9,7 +9,7 @@ function Menu({ show, map, cityCordinates, setVariable, setCity }) {
     const comparisions_years = [[<option key='comparision-default' value='-' id='comparision-default' href='#' className='active'>-</option>]]
     let year = useRef('1980');
     let comparision_year = useRef('-')
-    let variable = 'FOOD';
+    let variable = useRef('FOOD');
     const isInitialRender = useRef(true);
 
     const variables = ['FOOD', 'HOUSING', 'TRANSPORT', 'GOODS', 'SERVICE', 'TOTAL'];
@@ -27,33 +27,33 @@ function Menu({ show, map, cityCordinates, setVariable, setCity }) {
             return;
         if (isInitialRender.current) {
             isInitialRender.current = false;
-            setVariable(variable)
+            setVariable(variable.current)
             setTimeout(() =>
                 onMenuClick(), 1000);
         }
     });
     const onMenuClick = () => {
         if (map.current)
-            setPaintProperty(year.current, comparision_year.current, variable)
+            setPaintProperty(year.current, comparision_year.current, variable.current)
     };
     const onVariableClick = (e) => {
         if (!map.current)
             return;
 
-        variable = e.target.value;
-        setVariable(variable);
-        setPaintProperty(year.current, comparision_year.current, variable);
+        variable.current = e.target.value;
+        setVariable(variable.current);
+        setPaintProperty(year.current, comparision_year.current, variable.current);
     };
     const onYearClick = (e) => {
         year.current = e.target.value;
 
-        setPaintProperty(year.current, comparision_year.current, variable);
+        setPaintProperty(year.current, comparision_year.current, variable.current);
     };
 
     const onComparisionYearClick = (e) => {
         comparision_year.current = e.target.value;
 
-        setPaintProperty(year.current, comparision_year.current, variable);
+        setPaintProperty(year.current, comparision_year.current, variable.current);
     };
 
 
@@ -80,6 +80,7 @@ function Menu({ show, map, cityCordinates, setVariable, setCity }) {
         });
     };
     const setPaintProperty = (year, comparision_year, variable) => {
+        console.log(year, comparision_year, variable)
         let colorScheme = d3.interpolateGreys;
         let property_key = year + '-' + variable;
         let invertScheme = false;
