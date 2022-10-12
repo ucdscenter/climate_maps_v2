@@ -26,10 +26,14 @@ function Map() {
   // const [csv, setCsv] = useState(null);
   const csv = useRef(null);
   const variable = useRef('FOOD');
+  const year = useRef('1980');
+  const comparision_year = useRef('-');
   // const [variable, setVariable] = useState(null);
 
   const updateVariable = useRef((v) => { variable.current = v; console.log('set state of variable', v) });
   const updateCsv = useRef((data) => { console.log('csv', csv); csv.current = data });
+  const updateYear = useRef((data) => { console.log('year', year); year.current = data });
+  const updateComparisionYear = useRef((data) => { console.log('comparisionYear', comparision_year); comparision_year.current = data });
 
   const cityCordinates = {
     'Atlanta, GA': { lng: -84.32691971071415, lat: 33.759365066102475 },
@@ -110,12 +114,25 @@ function Map() {
       map.current.on('click', ['all_decades_emissions_fill', '2018_emissions_outlines_cities'], (e) => {
         console.log(e.features[0])
         const cityName = e.features[0].properties.CITYNAME;
-        const variableValue = e.features[0].properties[variable.current]
+        let property_key = year.current + '-' + variable.current;
+        let variableValue = e.features[0].properties[property_key]
+
         const isUrbanArea = cities.includes(cityName);
         console.log(city)
-        const row = csv && csv.current ? csv.current.find(data => data.GEOID == e.features[0].properties.GEOID10) : {};
-        const white = row && row.WHITE //e.features[0].properties.WHITE;
-        if (isUrbanArea) {
+        let row = csv && csv.current ? csv.current[year.current].find(data => data.GEOID == e.features[0].properties.GEOID10) : {};
+        let white = row && row.WHITE //e.features[0].properties.WHITE;
+
+        let tooltip_html =`% White in ${year.current}: ${white} <div> <div> ${property_key}: ${variableValue} <div>`;
+
+        if (comparision_year.current != '-' && comparision_year.current != year.current) {
+          property_key = comparision_year.current + '-' + variable.current;
+          variableValue = e.features[0].properties[property_key];
+          row = csv && csv.current ? csv.current[comparision_year.current].find(data => data.GEOID == e.features[0].properties.GEOID10) : {};
+           white = row && row.WHITE 
+          tooltip_html += `% White in ${comparision_year.current}: ${white}<div> ${property_key}: ${variableValue} <div>`;
+        }
+        
+        if (isUrbanArea && cityName != city.current) {
           const cords = cityCordinates[cityName];
           map.current.flyTo({
             center: [cords.lng, cords.lat],
@@ -126,12 +143,12 @@ function Map() {
           setCity(cityName);
           new mapboxgl.Popup()
             .setLngLat(cords)
-            .setHTML(`<div> City: ${cityName}</div> <div>% White: ${white} <div> <div> ${variable.current}: ${variableValue} <div>`)
+            .setHTML(`<div> City: ${cityName}</div> <div>` + tooltip_html)
             .addTo(map.current);
         } else {
           new mapboxgl.Popup()
             .setLngLat(e.lngLat)
-            .setHTML(`<div> City: Not an urban area</div> <div>% White: ${white} <div> <div> ${variable.current}: ${variableValue} <div>`)
+            .setHTML(`<div> City: Not an urban area</div> <div>` + tooltip_html)
             .addTo(map.current);
         }
       });
@@ -170,12 +187,12 @@ function Map() {
 
   return (
     <div>
-    <div className="container-flex">
+      <div className="container-flex">
         <div className="row">
           <div className="col-8 h-75">
             <div ref={mapContainer} className='map-container'>
-              <Menu show={showMenu} map={map} cityCordinates={cityCordinates} setVariable={updateVariable.current} setCity={setCity}></Menu>
-              <Charts variable={variable.current} hoveredTract={hoveredTract} city={city} setCsv={updateCsv.current}></Charts>
+              <Menu show={showMenu} map={map} cityCordinates={cityCordinates} setVariable={updateVariable.current} setCity={setCity} setYear={updateYear.current} setComparisionYear={updateComparisionYear.current}></Menu>
+              <Charts variable={variable.current} hoveredTract={hoveredTract} city={city} setCsv={updateCsv.current} year={year.current} comparision_year={comparision_year.current}></Charts>
             </div>
           </div>
           <div className="col-4">
