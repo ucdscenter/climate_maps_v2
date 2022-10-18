@@ -11,10 +11,22 @@ export function drawChart(height, width, data, variableX, variableY, city, svgCa
     }
 
     if (city) {
-        data.columns.push('Year')
-        year_data = data[year].map(row => { if (row['CITYNAME'] == city) { row['Year'] = year; return row; } });
+        data[year].columns.push('Year');
+        year_data = []
+        data[year].forEach(row => {
+            if (row['CITYNAME'] == city) {
+                row['Year'] = year;
+                year_data.push(row);
+            }
+        });
         if (comparision_year != '-') {
-            year_data = year_data.concat(data[comparision_year].map(row => { if (row['CITYNAME'] == city) { row['Year'] = comparision_year; return row; } }));
+            data[comparision_year].columns.push('Year');
+            data[comparision_year].forEach(row => {
+                if (row['CITYNAME'] == city) {
+                    row['Year'] = comparision_year;
+                    year_data.push(row);
+                }
+            });
         }
         // data = data.filter(row => row['CITYNAME'] == city);
         showTable(year_data);
@@ -57,7 +69,7 @@ export function drawChart(height, width, data, variableX, variableY, city, svgCa
     }
 }
 
-function showTable(data,) {
+function showTable(data) {
     if (!data && !data[0]) {
         return;
     }
