@@ -12,7 +12,7 @@ function Menu({ show, map, cityCordinates, setVariable, setCity, setYear, setCom
     let variable = useRef('FOOD');
     const isInitialRender = useRef(true);
 
-    const variables = ['FOOD', 'HOUSING', 'TRANSPORT', 'GOODS', 'SERVICE', 'TOTAL'];
+    const variables = ['FOOD', 'HOUSING', 'TRANSPORT', 'GOODS', 'SERVICE', 'TOTAL', 'WHITE'];
     const cities = ['-', 'Atlanta, GA', 'Boston, MA--NH--RI', 'Chicago, IL--IN', 'Cincinnati, OH--KY--IN',
         'Cleveland, OH', 'Dallas--Fort Worth--Arlington, TX', 'Denver--Aurora, CO', 'Houston, TX', 'Los Angeles--Long Beach--Anaheim, CA', 'Minneapolis--St. Paul, MN--WI',
         'Philadelphia, PA', 'Portland, OR--WA', 'St. Louis, MO--IL']
@@ -146,7 +146,7 @@ function Menu({ show, map, cityCordinates, setVariable, setCity, setYear, setCom
         style.push(range.max, ['to-color', colorscale[10]]);
         emissionsLegend.push(<div key={++i}><span style={getBackgroundColor(colorscale[10])}></span>{Math.round(range.max)}</div>)
         map.current.setPaintProperty(layerName, 'fill-color', style);
-
+        map.color_scale = [range, colorScheme];
         setEmissionsLegend(emissionsLegend);
         if (!showLegend) {
             setShowLegend(!showLegend);

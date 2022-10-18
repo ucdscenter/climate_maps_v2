@@ -65,6 +65,9 @@ function Map() {
       zoom: zoom
     });
 
+    map.color_scale = [];
+    console.log(map.random_var)
+
     map.current.on('load', () => {
       // Add a data source containing GeoJSON data.
       map.current.addSource("2018_emissions", {
@@ -142,8 +145,8 @@ function Map() {
             zoom: 8,
             duration: 2000,
             essential: true,
-          });
-          setCity(cityName);*/
+          });*/
+          setCity(cityName);
           new mapboxgl.Popup()
             .setLngLat(e.lngLat)
             .setHTML(`<div> City: ${cityName}</div> <div>` + tooltip_html)
@@ -195,7 +198,7 @@ function Map() {
           <div className="col-8 h-75">
             <div ref={mapContainer} className='map-container'>
               <Menu show={showMenu} map={map} cityCordinates={cityCordinates} setVariable={updateVariable.current} setCity={setCity} setYear={updateYear.current} setComparisionYear={updateComparisionYear.current}></Menu>
-              <Charts variable={variable.current} hoveredTract={hoveredTract} city={city} setCsv={updateCsv.current} year={year.current} comparision_year={comparision_year.current}></Charts>
+              <Charts variable={variable.current} map={map} hoveredTract={hoveredTract} city={city} setCsv={updateCsv.current} year={year.current} comparision_year={comparision_year.current}></Charts>
             </div>
           </div>
           <div className="col-4">
