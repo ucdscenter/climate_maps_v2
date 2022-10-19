@@ -1,7 +1,7 @@
 import './App.css';
 import React, { useState, useEffect, useRef } from 'react';
 import * as d3 from 'd3';
-import emissions_range from './emissions_range.json';
+// import emissions_range from './emissions_range.json';
 import emissions_range_across_years from './emissions_range_across_years.json';
 
 function Menu({ show, map, cityCordinates, setVariable, setCity, setYear, setComparisionYear, setColorScale }) {
@@ -17,7 +17,6 @@ function Menu({ show, map, cityCordinates, setVariable, setCity, setYear, setCom
     const cities = ['-', 'Atlanta, GA', 'Boston, MA--NH--RI', 'Chicago, IL--IN', 'Cincinnati, OH--KY--IN',
         'Cleveland, OH', 'Dallas--Fort Worth--Arlington, TX', 'Denver--Aurora, CO', 'Houston, TX', 'Los Angeles--Long Beach--Anaheim, CA', 'Minneapolis--St. Paul, MN--WI',
         'Philadelphia, PA', 'Portland, OR--WA', 'St. Louis, MO--IL']
-    const emissionsRange = emissions_range;
     const variablesList = [];
     const citiesList = [];
     const getBackgroundColor = (color) => { return { "backgroundColor": color } };
@@ -120,7 +119,7 @@ function Menu({ show, map, cityCordinates, setVariable, setCity, setYear, setCom
 
         let i = 0, greyIndex = 0, redIndex = 0, greenIndex = 0;
         const steps = 10;
-
+        const colorScheme = [];
         const diff = range.max - range.min;
         const step = diff / 11;
         let lastColor = greys[10];
@@ -136,13 +135,21 @@ function Menu({ show, map, cityCordinates, setVariable, setCity, setYear, setCom
                 color = reds[redIndex++];
                 lastColor = reds[redIndex];
             }
+            colorScheme.push(color);
             style.push(value, ['to-color', color]);
             emissionsLegend.push(<div key={i}><span style={getBackgroundColor(color)}></span>{Math.round(value)}</div>)
         }
+        colorScheme.push(lastColor);
         style.push(range.max, ['to-color', lastColor]);
         emissionsLegend.push(<div key={++i}><span style={getBackgroundColor(lastColor)}></span>{Math.round(range.max)}</div>)
         map.current.setPaintProperty(layerName, 'fill-color', style);
-        setColorScale([range, colorScheme]);
+        const colorInterpolator = (i) => {
+            if(i < 0 || i > 10) {
+                return "rgb(0,0,0)";
+            }
+            return colorScheme[Math.round(i*10)];
+        }
+        setColorScale([range, colorInterpolator]);
         setEmissionsLegend(emissionsLegend);
         if (!showLegend) {
             setShowLegend(!showLegend);
