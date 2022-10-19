@@ -127,13 +127,16 @@ code {
 
 .regression {
   fill: none;
-  stroke: orange;
+  stroke: blue;
   stroke-width: 1.5px;
 }
 
 .circle-selected {
-  stroke: rgb(200, 255, 0);
-  stroke-width: 6;
+  stroke: black;
+  stroke-width: 2;
+  stroke-opacity : 1;
+  fill:  rgb(200, 255, 0);
+  opacity: 1;
 }
 
 #emissions-table {

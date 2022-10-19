@@ -4,6 +4,7 @@ import React, { useRef, useEffect, useState } from 'react';
 // eslint-disable-next-line import/no-webpack-loader-syntax, import/no-unresolved
 import Charts from './Charts';
 import Menu from './Menu';
+import * as d3 from 'd3';
 import mapboxgl from 'mapbox-gl'; // '!mapbox-gl';eslint-disable-line import/no-webpack-loader-syntax
 // @ts-ignore
 // eslint-disable-next-line import/no-webpack-loader-syntax, import/no-unresolved
@@ -18,7 +19,6 @@ function Map() {
   const [lat, setLat] = useState(40.35);
   const [zoom, setZoom] = useState(3.5);
   const [showMenu, setShowMenu] = useState(false);
-  console.log('setting variable again'.variable);
   const [city, setCity] = useState(null);
   const [hoveredTract, setHoveredTract] = useState(null);
   const [reloadTable, setReloadTable] = useState(null);
@@ -28,13 +28,16 @@ function Map() {
   const variable = useRef('FOOD');
   const year = useRef('1980');
   const comparision_year = useRef('-');
+  const color_scale = useRef(null);
   // const [variable, setVariable] = useState(null);
 
   const updateVariable = useRef((v) => { variable.current = v; console.log('set state of variable', v) });
+  const updateColorScale = useRef((s) => { color_scale.current = s});
   const updateCsv = useRef((data) => { console.log('csv', csv); csv.current = data });
   const updateYear = useRef((data) => { console.log('year', year); year.current = data });
   const updateComparisionYear = useRef((data) => { console.log('comparisionYear', comparision_year); comparision_year.current = data });
-
+  const percentFormat = d3.format('.2%')
+  const emissionsFormat = d3.format('.2f')
   const cityCordinates = {
     'Atlanta, GA': { lng: -84.32691971071415, lat: 33.759365066102475 },
     'Los Angeles--Long Beach--Anaheim, CA': { lng: -118.09434620224866, lat: 33.96924960228989 },
@@ -64,6 +67,9 @@ function Map() {
       zoom: zoom
     });
 
+    
+    console.log(map.random_var)
+
     map.current.on('load', () => {
       // Add a data source containing GeoJSON data.
       map.current.addSource("2018_emissions", {
@@ -72,6 +78,7 @@ function Map() {
           `${process.env.REACT_APP_TILES_URL}/data/${process.env.REACT_APP_TILES_NAME}/{z}/{x}/{y}.pbf`
         ],
         // generateId: true // Uncomment to use feature states
+
       });
 
       map.current.addLayer({
@@ -118,40 +125,44 @@ function Map() {
         let variableValue = e.features[0].properties[property_key]
 
         const isUrbanArea = cities.includes(cityName);
-        console.log(city)
         let row = csv && csv.current ? csv.current[year.current].find(data => data.GEOID == e.features[0].properties.GEOID10) : {};
         let white = row && row.WHITE //e.features[0].properties.WHITE;
 
-        let tooltip_html =`% White in ${year.current}: ${white} <div> <div> ${property_key}: ${variableValue} <div>`;
+        let tooltip_html =`% White in ${year.current}: ${percentFormat(white)} <div> <div> ${property_key}: ${emissionsFormat(variableValue)} <div>`;
 
         if (comparision_year.current != '-' && comparision_year.current != year.current) {
           property_key = comparision_year.current + '-' + variable.current;
           variableValue = e.features[0].properties[property_key];
           row = csv && csv.current ? csv.current[comparision_year.current].find(data => data.GEOID == e.features[0].properties.GEOID10) : {};
            white = row && row.WHITE 
-          tooltip_html += `% White in ${comparision_year.current}: ${white}<div> ${property_key}: ${variableValue} <div>`;
+          tooltip_html += `% White in ${comparision_year.current}: ${percentFormat(white)}<div> ${property_key}: ${emissionsFormat(variableValue)} <div>`;
         }
+        console.log(city)
         
-        if (isUrbanArea && cityName != city.current) {
-          const cords = cityCordinates[cityName];
+        //if (isUrbanArea && cityName != city.current) {
+
+        if (isUrbanArea) {
+          /*const cords = cityCordinates[cityName];
           map.current.flyTo({
             center: [cords.lng, cords.lat],
             zoom: 8,
             duration: 2000,
             essential: true,
-          });
+          });*/
           setCity(cityName);
           new mapboxgl.Popup()
-            .setLngLat(cords)
+            .setLngLat(e.lngLat)
             .setHTML(`<div> City: ${cityName}</div> <div>` + tooltip_html)
             .addTo(map.current);
         } else {
           new mapboxgl.Popup()
             .setLngLat(e.lngLat)
-            .setHTML(`<div> City: Not an urban area</div> <div>` + tooltip_html)
+            .setHTML(`<div></div> <div>` + tooltip_html)
             .addTo(map.current);
         }
       });
+
+      let color_scale = [];
 
       map.current.on('mousemove', ['2018_emissions_outlines_cities', 'all_decades_emissions_fill'], (e, x) => {
         if (e.features.length > 0 && e.features[0].properties) {
@@ -191,8 +202,24 @@ function Map() {
         <div className="row">
           <div className="col-8 h-75">
             <div ref={mapContainer} className='map-container'>
-              <Menu show={showMenu} map={map} cityCordinates={cityCordinates} setVariable={updateVariable.current} setCity={setCity} setYear={updateYear.current} setComparisionYear={updateComparisionYear.current}></Menu>
-              <Charts variable={variable.current} hoveredTract={hoveredTract} city={city} setCsv={updateCsv.current} year={year.current} comparision_year={comparision_year.current}></Charts>
+              <Menu 
+                  show={showMenu}
+                  map={map}
+                  cityCordinates={cityCordinates}
+                  setVariable={updateVariable.current}
+                  setCity={setCity}
+                  setYear={updateYear.current}
+                  setComparisionYear={updateComparisionYear.current}
+                  setColorScale={updateColorScale.current}>
+              </Menu>
+              <Charts variable={variable.current} 
+                colorScale={color_scale.current} 
+                hoveredTract={hoveredTract} 
+                city={city} 
+                setCsv={updateCsv.current} 
+                year={year.current} 
+                comparision_year={comparision_year.current}>
+              </Charts>
             </div>
           </div>
           <div className="col-4">

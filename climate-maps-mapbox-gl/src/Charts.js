@@ -2,14 +2,14 @@ import React from 'react';
 import * as d3 from 'd3';
 import { useEffect, useRef } from 'react';
 
-export function drawChart(height, width, data, variableX, variableY, city, svgCache, year, comparision_year) {
+export function drawChart(height, width, data, variableX, variableY, city, svgCache, year, comparision_year, colorscheme) {
     let year_data;
     let renderCircles = false;
     let years = [year];
     if (comparision_year != '-') {
         years.push(comparision_year);
     }
-
+    
     if (city) {
         data[year].columns.push('Year');
         year_data = []
@@ -30,7 +30,7 @@ export function drawChart(height, width, data, variableX, variableY, city, svgCa
         }
         // data = data.filter(row => row['CITYNAME'] == city);
         showTable(year_data);
-        d3.select('#charts-title').html('% White vs Emissions in ' + city);
+        d3.select('#charts-title').html('% White vs Emissions in ' + city.split(',')[0]);
         d3.select('#table-title').html('Data for ' + city);
         renderCircles = true;
     } else {
@@ -61,7 +61,8 @@ export function drawChart(height, width, data, variableX, variableY, city, svgCa
             variableX,
             variableY,
             renderCircles,
-            years
+            years,
+            colorscheme: colorscheme
         })
 
         chartContainer.append(chart)
@@ -70,6 +71,8 @@ export function drawChart(height, width, data, variableX, variableY, city, svgCa
 }
 
 function showTable(data) {
+    const emissionsFormat = d3.format('.4s')
+    const percentFormat = d3.format('.2%')
     if (!data && !data[0]) {
         return;
     }
@@ -78,10 +81,9 @@ function showTable(data) {
     if (existing) {
         existing.remove()
     }
-
-    const columns = Object.keys(data[0]);
+    const columns = ['GEOID', 'Year', 'WHITE', 'TOTAL', 'TRANSPORT', 'FOOD', 'HOUSING',  'GOODS', 'SERVICE']
     let container = d3.select('#emissions-table')
-    let table = container.append("table");
+    let table = container.append("table").classed("table", true);
     let thead = table.append("thead");
     let tbody = table.append("tbody");
     thead.append('tr').selectAll('th').data(columns).enter().append('th').text(c => c);
@@ -93,16 +95,25 @@ function showTable(data) {
         .data((row) => columns.map((column) => { return { value: row[column] } }))
         .enter()
         .append("td")
-        .text(function (d) { return d.value; });
+        .text(function (d, i) { 
+            if(i <= 1){
+                return d.value;
+            }
+            if(i == 2){
+                return percentFormat(d.value)
+            }
+            return emissionsFormat(d.value) });
 }
 
-function Charts({ variable, hoveredTract, city, setCsv, year, comparision_year }) {
-    console.log('Hey', { variable, hoveredTract, city, setCsv, year, comparision_year })
+function Charts({ variable, colorScale,  hoveredTract, city, setCsv, year, comparision_year }) {
+
+
+    //console.log('Hey', { variable, hoveredTract, city, setCsv, year, comparision_year })
     const renderedVariable = useRef(null);
     const renderedCity = useRef(null);
     const highlightedHoveredTract = useRef(null);
     const fetchedYears = useRef(new Set());
-    console.log(city)
+    //console.log(city)
     if (variable == null)
         variable = 'FOOD';
     const isInitialRender = useRef(true);
@@ -110,8 +121,10 @@ function Charts({ variable, hoveredTract, city, setCsv, year, comparision_year }
     const svgCache = useRef({});
     // const [data, setData] = useState([]);
     const renderedCharts = false;
-    console.log('variable ', variable)
-    console.log(hoveredTract)
+    const colorscheme = colorScale
+    //console.log('variable ', variable)
+    //console.log(hoveredTract)
+
     useEffect(() => {
         const yearsToFetch = []
         if (year && !fetchedYears.current.has(year)) {
@@ -142,14 +155,14 @@ function Charts({ variable, hoveredTract, city, setCsv, year, comparision_year }
                     if (city) {
                         renderedCity.city = city;
                     }
-                    drawChart(400, 700, emissionsData.current, 'WHITE', variable, city, svgCache.current, year, comparision_year);
+                    drawChart(400, 700, emissionsData.current, 'WHITE', variable, city, svgCache.current, year, comparision_year, colorscheme);
                 }
             });
         } else {
             if ((renderedVariable.current != variable || renderedCity.current != city) && emissionsData.current) {
                 renderedVariable.current = variable;
                 renderedCity.current = city;
-                drawChart(400, 700, emissionsData.current, 'WHITE', variable, city, svgCache.current, year, comparision_year);
+                drawChart(400, 700, emissionsData.current, 'WHITE', variable, city, svgCache.current, year, comparision_year, colorscheme);
             }
         }
 
@@ -158,10 +171,10 @@ function Charts({ variable, hoveredTract, city, setCsv, year, comparision_year }
 
     useEffect(() => {
         if (hoveredTract && highlightedHoveredTract.current != hoveredTract) {
-            const highlighted = d3.select(`.circle-${highlightedHoveredTract.current}`);
+            const highlighted = d3.selectAll(`.circle-${highlightedHoveredTract.current}`);
             if (highlighted)
                 highlighted.classed("circle-selected", false);
-            d3.select(`.circle-${hoveredTract}`).classed("circle-selected", true).raise();
+            d3.selectAll(`.circle-${hoveredTract}`).classed("circle-selected", true).raise();
             highlightedHoveredTract.current = hoveredTract;
         }
     }, [hoveredTract])
@@ -218,8 +231,10 @@ function Scatterplot(data, {
     variableX,
     variableY,
     renderCircles,
-    years
+    years,
+    colorscheme = undefined
 } = {}) {
+
     // Compute values.
     // data = data.filter(d => isFinite(d));
     let X = []//d3.map(data, x);
@@ -253,7 +268,6 @@ function Scatterplot(data, {
     })
     // let X_year = X.filter(i => i['Year'] == year);
     // let Y_year = Y.filter(i => i['Year'] == year);
-
 
     data.forEach((row) => {
         let lineDot = {};
@@ -346,19 +360,83 @@ function Scatterplot(data, {
         .attr("stroke", halo)
         .attr("stroke-width", haloWidth);
     if (renderCircles) {
-        svg.append("g")
-            .attr("class", "circle-group")
-            .attr("fill", fill)
-            .attr("fill-opacity", 0.5)
-            .attr("stroke", stroke)
-            .attr("stroke-width", strokeWidth)
-            .selectAll("circle")
-            .data(I)
-            .join("circle")
-            .attr("cx", i => xScale(X[i]))
-            .attr("cy", i => yScale(Y[i]))
-            .attr("r", r)
-            .attr("class", i => 'circle-' + data[i].GEOID);
+
+        let arrowData = {}
+
+        data.forEach(function(d){
+            if (arrowData[d.GEOID] == undefined){
+                arrowData[d.GEOID] = [{ 'x' : x(d), 'y' : y(d), 'id' : d.GEOID}];
+            }
+            else {
+                arrowData[d.GEOID].push({ 'x' : x(d), 'y' : y(d), 'id' : d.GEOID})
+            }
+        })
+
+        if(years.length == 2){
+            Object.keys(arrowData).forEach(function(k){
+                if(arrowData[k].length < 2){
+                    delete arrowData[k];
+                } 
+            })
+
+            let arrowLine = d3.line().x(d => xScale(d.x)).y(d => yScale(d.y));
+            let cScale = d3.scaleLinear().domain([1,1]).range([1,1])
+            let colorS = d3.interpolateGreys;
+            if (colorscheme != undefined){
+                cScale = d3.scaleLinear().domain([colorscheme[0].min, colorscheme[0].max]).range([0,1]);
+                colorS = colorscheme[1];
+            }
+
+            svg.append("defs").selectAll("marker")
+                .data(['thing'])
+                .join("marker")
+                .attr("id", "arrow")
+                .attr("viewBox", "0 -5 10 10")
+                .attr("refX", 0)
+                .attr("refY", 0)
+                .attr("markerWidth", 6)
+                .attr("markerHeight", 8)
+                .attr("orient", "auto")
+                .append("path")
+                .attr("fill", "black")
+                .style("fill-opacity", '.5')
+                .attr("d", 'M0,-5L10,0L0,5');
+
+            svg.append("g", "arrow-group")
+                .selectAll(".chart-arrow")
+                .data(Object.keys(arrowData))
+                .enter()
+                .append("path")
+                .attr("d", function(d){
+                    if(arrowData[d].length == 2){
+                        return arrowLine(arrowData[d])
+                    }
+                })
+                .attr("stroke", function(d){
+                    return colorS(cScale(arrowData[d][0].y - arrowData[d][1].y))
+                })
+                .attr("stroke-opacity", .7)
+                .attr('marker-end', 'url(#arrow)')
+                .attr("class", d => 'circle-' + arrowData[d][0].id);
+
+        }
+        else {
+            svg.append("g")
+                .attr("class", "circle-group")
+                .selectAll("circle")
+                .data(Object.keys(arrowData))
+                .join("circle")
+                .attr("fill", fill)
+                .attr("fill-opacity", 0.5)
+                .attr("stroke", stroke)
+                .attr("stroke-width", strokeWidth)
+
+                .attr("cx", d => xScale(arrowData[d][0].x))
+                .attr("cy", d => yScale(arrowData[d][0].y))
+                .attr("r", r)
+                .attr("class", d => 'circle-' + arrowData[d][0].id);
+        }
+
     }
 
     let defined;

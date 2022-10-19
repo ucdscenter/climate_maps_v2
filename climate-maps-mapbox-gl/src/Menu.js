@@ -4,7 +4,7 @@ import * as d3 from 'd3';
 import emissions_range from './emissions_range.json';
 import emissions_range_across_years from './emissions_range_across_years.json';
 
-function Menu({ show, map, cityCordinates, setVariable, setCity, setYear, setComparisionYear }) {
+function Menu({ show, map, cityCordinates, setVariable, setCity, setYear, setComparisionYear, setColorScale }) {
     const years = [];
     const allYears = ['1980', '1990', '2000', '2010', '2018'];
     const comparisions_years = [[<option key='comparision-default' value='-' id='comparision-default' href='#' className='active'>-</option>]]
@@ -13,7 +13,7 @@ function Menu({ show, map, cityCordinates, setVariable, setCity, setYear, setCom
     let variable = useRef('FOOD');
     const isInitialRender = useRef(true);
 
-    const variables = ['FOOD', 'HOUSING', 'TRANSPORT', 'GOODS', 'SERVICE', 'TOTAL'];
+    const variables = ['FOOD', 'HOUSING', 'TRANSPORT', 'GOODS', 'SERVICE', 'TOTAL', 'WHITE'];
     const cities = ['-', 'Atlanta, GA', 'Boston, MA--NH--RI', 'Chicago, IL--IN', 'Cincinnati, OH--KY--IN',
         'Cleveland, OH', 'Dallas--Fort Worth--Arlington, TX', 'Denver--Aurora, CO', 'Houston, TX', 'Los Angeles--Long Beach--Anaheim, CA', 'Minneapolis--St. Paul, MN--WI',
         'Philadelphia, PA', 'Portland, OR--WA', 'St. Louis, MO--IL']
@@ -142,7 +142,7 @@ function Menu({ show, map, cityCordinates, setVariable, setCity, setYear, setCom
         style.push(range.max, ['to-color', lastColor]);
         emissionsLegend.push(<div key={++i}><span style={getBackgroundColor(lastColor)}></span>{Math.round(range.max)}</div>)
         map.current.setPaintProperty(layerName, 'fill-color', style);
-
+        setColorScale([range, colorScheme]);
         setEmissionsLegend(emissionsLegend);
         if (!showLegend) {
             setShowLegend(!showLegend);
