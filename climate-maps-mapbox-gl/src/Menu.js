@@ -2,10 +2,11 @@ import './App.css';
 import React, { useState, useEffect, useRef } from 'react';
 import * as d3 from 'd3';
 import emissions_range from './emissions_range.json';
-import { color } from 'd3';
+import emissions_range_across_years from './emissions_range_across_years.json';
 
 function Menu({ show, map, cityCordinates, setVariable, setCity, setYear, setComparisionYear }) {
     const years = [];
+    const allYears = ['1980', '1990', '2000', '2010', '2018'];
     const comparisions_years = [[<option key='comparision-default' value='-' id='comparision-default' href='#' className='active'>-</option>]]
     let year = useRef('1980');
     let comparision_year = useRef('-')
@@ -81,46 +82,32 @@ function Menu({ show, map, cityCordinates, setVariable, setCity, setYear, setCom
     };
     const setPaintProperty = (year, comparision_year, variable) => {
         console.log(year, comparision_year, variable)
-        let colorScheme = d3.interpolateGreys;
+        let isComparision = false
         let property_key = year + '-' + variable;
-        let invertScheme = false;
-        let colorscale = [];
-        let [range, layerName] = [emissionsRange[property_key], `all_decades_emissions_fill`];
+        const reds = [], greens = [], greys = [];
+        let [range, layerName] = [emissions_range_across_years[variable], `all_decades_emissions_fill`];
 
         if (comparision_year != '-' && comparision_year != year) {
-            let base = Number(year);
-            let comparision = Number(comparision_year);
+            range = emissions_range_across_years['COMPARISION-' + variable];
+            isComparision = true;
+            const base = Number(year);
+            const comparision = Number(comparision_year);
+
 
             if (base > comparision) {
-                const temp = base;
-                base = comparision;
-                comparision = temp;
-                range.min *= -1;
-                range.max *= -1;
+                alert('Base year must be before the comparision year.');
+                return;
             }
 
             year = base + '-' + comparision;
             property_key = year + '-' + variable;
-            range = emissionsRange[property_key];
-            // second year < first year
-            if (range.min < 0 && range.max < 0) {
-                colorScheme = d3.interpolateGreens;
-            } else if (range.min > 0 && range.max > 0) {     // second year > first year
-                colorScheme = d3.interpolateReds;
-            } else {
-                colorScheme = d3.interpolateRdYlGn;
-                invertScheme = true;
-            }
         }
 
         for (let i = 0; i <= 10; i++) {
-            colorscale.push(colorScheme(i / 10));
+            greys.push(d3.interpolateGreys(i / 10));
+            reds.push(d3.interpolateReds(i / 10));
+            greens.push(d3.interpolateGreens(i / 10));
         }
-
-        if (invertScheme) {
-            colorscale.reverse();
-        }
-
 
         let emissionsLegend = [<div key="no-data"><span style={getBackgroundColor('#ffffff')}></span>No Data</div>];
 
@@ -128,23 +115,32 @@ function Menu({ show, map, cityCordinates, setVariable, setCity, setYear, setCom
         const style = [
             'interpolate',
             ['linear'],
-            ['get', property_key],
-            range.min,
-            ['to-color', colorscale[0]]
+            ['get', property_key]
         ];
-        
-        let i = 0;
-        emissionsLegend.push(<div key={i++}><span style={getBackgroundColor(colorscale[0])}></span>{Math.round(range.min)}</div>)
+
+        let i = 0, greyIndex = 0, redIndex = 0, greenIndex = 0;
         const steps = 10;
+
         const diff = range.max - range.min;
         const step = diff / 11;
-        for (let value = range.min; i <= steps; i++) {
+        let lastColor = greys[10];
+        for (let value = range.min - step; i <= steps; i++) {
+            let color;
             value += step;
-            style.push(value, ['to-color', colorscale[i]]);
-            emissionsLegend.push(<div key={i}><span style={getBackgroundColor(colorscale[i])}></span>{Math.round(value)}</div>)
+            if (!isComparision) {
+                color = greys[greyIndex++];
+            } else if (value < 0) {
+                color = greens[greenIndex++];
+                lastColor = greens[greenIndex];
+            } else {
+                color = reds[redIndex++];
+                lastColor = reds[redIndex];
+            }
+            style.push(value, ['to-color', color]);
+            emissionsLegend.push(<div key={i}><span style={getBackgroundColor(color)}></span>{Math.round(value)}</div>)
         }
-        style.push(range.max, ['to-color', colorscale[10]]);
-        emissionsLegend.push(<div key={++i}><span style={getBackgroundColor(colorscale[10])}></span>{Math.round(range.max)}</div>)
+        style.push(range.max, ['to-color', lastColor]);
+        emissionsLegend.push(<div key={++i}><span style={getBackgroundColor(lastColor)}></span>{Math.round(range.max)}</div>)
         map.current.setPaintProperty(layerName, 'fill-color', style);
 
         setEmissionsLegend(emissionsLegend);
@@ -154,7 +150,7 @@ function Menu({ show, map, cityCordinates, setVariable, setCity, setYear, setCom
 
     }//setPaintProperty
 
-    ['1980', '1990', '2000', '2010', '2018'].forEach(i => {
+    allYears.forEach(i => {
         years.push(<option key={i} value={i} id={i} href='#' className='active'>{i}</option>);
         const comparision_year = 'comparision-' + i;
         comparisions_years.push(<option key={comparision_year} value={i} id={comparision_year} href='#' className='active'>{i}</option>);
