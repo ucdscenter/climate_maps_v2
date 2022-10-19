@@ -212,7 +212,14 @@ function Map() {
                   setComparisionYear={updateComparisionYear.current}
                   setColorScale={updateColorScale.current}>
               </Menu>
-              <Charts variable={variable.current} colorScale={color_scale.current} hoveredTract={hoveredTract} city={city} setCsv={updateCsv.current} year={year.current} comparision_year={comparision_year.current}></Charts>
+              <Charts variable={variable.current} 
+                colorScale={color_scale.current} 
+                hoveredTract={hoveredTract} 
+                city={city} 
+                setCsv={updateCsv.current} 
+                year={year.current} 
+                comparision_year={comparision_year.current}>
+              </Charts>
             </div>
           </div>
           <div className="col-4">
