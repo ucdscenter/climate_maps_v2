@@ -105,7 +105,7 @@ function showTable(data) {
             return emissionsFormat(d.value) });
 }
 
-function Charts({ variable, map,  hoveredTract, city, setCsv, year, comparision_year }) {
+function Charts({ variable, colorScale,  hoveredTract, city, setCsv, year, comparision_year }) {
 
 
     //console.log('Hey', { variable, hoveredTract, city, setCsv, year, comparision_year })
@@ -121,7 +121,7 @@ function Charts({ variable, map,  hoveredTract, city, setCsv, year, comparision_
     const svgCache = useRef({});
     // const [data, setData] = useState([]);
     const renderedCharts = false;
-    const colorscheme = map.color_scale
+    const colorscheme = colorScale
     //console.log('variable ', variable)
     //console.log(hoveredTract)
 
@@ -235,7 +235,6 @@ function Scatterplot(data, {
     colorscheme = undefined
 } = {}) {
 
-    console.log(colorscheme)
     // Compute values.
     // data = data.filter(d => isFinite(d));
     let X = []//d3.map(data, x);
@@ -438,31 +437,6 @@ function Scatterplot(data, {
                 .attr("class", d => 'circle-' + arrowData[d][0].id);
         }
 
-        console.log(arrowData);
-
-        //console.log(years)
-        //console.log(lineDataByYear)
-        //console.log(lineDataByYear.current[years[0]]['X'])
-        //console.log(dataByYear[years[0]]['X'])
-
-        //console.log(I)
-
-        /*console.log(I)
-        svg.append("g")
-            .attr("class", "circle-group")
-            .attr("fill", fill)
-            .attr("fill-opacity", 0.5)
-            .attr("stroke", stroke)
-            .attr("stroke-width", strokeWidth)
-            .selectAll("circle")
-            .data(I)
-            .join("circle")
-            .attr("cx", i => xScale(X[i]))
-            .attr("cy", i => yScale(Y[i]))
-            .attr("r", r)
-            .attr("class", i => 'circle-' + data[i].GEOID);*/
-        //ObjectlineDataByYear
-        //svg.append("g")
     }
 
     let defined;

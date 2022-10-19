@@ -4,7 +4,7 @@ import * as d3 from 'd3';
 import emissions_range from './emissions_range.json';
 import { color } from 'd3';
 
-function Menu({ show, map, cityCordinates, setVariable, setCity, setYear, setComparisionYear }) {
+function Menu({ show, map, cityCordinates, setVariable, setCity, setYear, setComparisionYear, setColorScale }) {
     const years = [];
     const comparisions_years = [[<option key='comparision-default' value='-' id='comparision-default' href='#' className='active'>-</option>]]
     let year = useRef('1980');
@@ -146,7 +146,7 @@ function Menu({ show, map, cityCordinates, setVariable, setCity, setYear, setCom
         style.push(range.max, ['to-color', colorscale[10]]);
         emissionsLegend.push(<div key={++i}><span style={getBackgroundColor(colorscale[10])}></span>{Math.round(range.max)}</div>)
         map.current.setPaintProperty(layerName, 'fill-color', style);
-        map.color_scale = [range, colorScheme];
+        setColorScale([range, colorScheme]);
         setEmissionsLegend(emissionsLegend);
         if (!showLegend) {
             setShowLegend(!showLegend);

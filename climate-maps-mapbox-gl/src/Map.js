@@ -28,9 +28,11 @@ function Map() {
   const variable = useRef('FOOD');
   const year = useRef('1980');
   const comparision_year = useRef('-');
+  const color_scale = useRef(null);
   // const [variable, setVariable] = useState(null);
 
   const updateVariable = useRef((v) => { variable.current = v; console.log('set state of variable', v) });
+  const updateColorScale = useRef((s) => { color_scale.current = s});
   const updateCsv = useRef((data) => { console.log('csv', csv); csv.current = data });
   const updateYear = useRef((data) => { console.log('year', year); year.current = data });
   const updateComparisionYear = useRef((data) => { console.log('comparisionYear', comparision_year); comparision_year.current = data });
@@ -65,7 +67,7 @@ function Map() {
       zoom: zoom
     });
 
-    map.color_scale = [];
+    
     console.log(map.random_var)
 
     map.current.on('load', () => {
@@ -76,6 +78,7 @@ function Map() {
           `${process.env.REACT_APP_TILES_URL}/data/${process.env.REACT_APP_TILES_NAME}/{z}/{x}/{y}.pbf`
         ],
         // generateId: true // Uncomment to use feature states
+
       });
 
       map.current.addLayer({
@@ -159,6 +162,8 @@ function Map() {
         }
       });
 
+      let color_scale = [];
+
       map.current.on('mousemove', ['2018_emissions_outlines_cities', 'all_decades_emissions_fill'], (e, x) => {
         if (e.features.length > 0 && e.features[0].properties) {
           // if (hoveredTract !== null) {
@@ -197,8 +202,17 @@ function Map() {
         <div className="row">
           <div className="col-8 h-75">
             <div ref={mapContainer} className='map-container'>
-              <Menu show={showMenu} map={map} cityCordinates={cityCordinates} setVariable={updateVariable.current} setCity={setCity} setYear={updateYear.current} setComparisionYear={updateComparisionYear.current}></Menu>
-              <Charts variable={variable.current} map={map} hoveredTract={hoveredTract} city={city} setCsv={updateCsv.current} year={year.current} comparision_year={comparision_year.current}></Charts>
+              <Menu 
+                  show={showMenu}
+                  map={map}
+                  cityCordinates={cityCordinates}
+                  setVariable={updateVariable.current}
+                  setCity={setCity}
+                  setYear={updateYear.current}
+                  setComparisionYear={updateComparisionYear.current}
+                  setColorScale={updateColorScale.current}>
+              </Menu>
+              <Charts variable={variable.current} colorScale={color_scale.current} hoveredTract={hoveredTract} city={city} setCsv={updateCsv.current} year={year.current} comparision_year={comparision_year.current}></Charts>
             </div>
           </div>
           <div className="col-4">
