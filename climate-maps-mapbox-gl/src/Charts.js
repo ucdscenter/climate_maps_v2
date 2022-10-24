@@ -383,7 +383,7 @@ function Scatterplot(data, {
             let cScale = d3.scaleLinear().domain([1,1]).range([1,1])
             let colorS = d3.interpolateGreys;
             if (colorscheme != undefined){
-                cScale = d3.scaleLinear().domain([colorscheme[0].min, colorscheme[0].max]).range([0,1]);
+                cScale = d3.scaleLinear().domain([colorscheme[0].min, colorscheme[0].max]).range([0,10]);
                 colorS = colorscheme[1];
             }
 
@@ -413,9 +413,9 @@ function Scatterplot(data, {
                     }
                 })
                 .attr("stroke", function(d){
-                    return colorS(cScale(arrowData[d][0].y - arrowData[d][1].y))
+                    return colorS(Math.round(cScale(arrowData[d][1].y - arrowData[d][0].y)));
                 })
-                .attr("stroke-opacity", .7)
+                .attr("stroke-opacity", .9)
                 .attr('marker-end', 'url(#arrow)')
                 .attr("class", d => 'circle-' + arrowData[d][0].id);
 

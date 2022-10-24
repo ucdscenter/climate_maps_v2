@@ -87,7 +87,7 @@ function Map() {
         "source-layer": "censustracts",
         paint: {
           'fill-color': 'transparent',
-          'fill-opacity': 0.8
+          'fill-opacity': .9
         },
         'minzoom': 2,
         'maxzoom': 13,
@@ -118,7 +118,6 @@ function Map() {
       map.current.addControl(new mapboxgl.NavigationControl());
 
       map.current.on('click', ['all_decades_emissions_fill', '2018_emissions_outlines_cities'], (e) => {
-        console.log(e.features[0])
         const cityName = e.features[0].properties.CITYNAME;
         let property_key = year.current + '-' + variable.current;
         let variableValue = e.features[0].properties[property_key]
@@ -136,7 +135,6 @@ function Map() {
            white = row && row.WHITE 
           tooltip_html += `% White in ${comparision_year.current}: ${percentFormat(white)}<div> ${property_key}: ${emissionsFormat(variableValue)} <div>`;
         }
-        console.log(city)
         
         //if (isUrbanArea && cityName != city.current) {
 
