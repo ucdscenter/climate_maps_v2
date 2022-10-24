@@ -21,7 +21,6 @@ function Map() {
   const [showMenu, setShowMenu] = useState(false);
   const [city, setCity] = useState(null);
   const [hoveredTract, setHoveredTract] = useState(null);
-  const [reloadTable, setReloadTable] = useState(null);
   // TODO: Remove after new mbtiles
   // const [csv, setCsv] = useState(null);
   const csv = useRef(null);
@@ -161,8 +160,6 @@ function Map() {
             .addTo(map.current);
         }
       });
-
-      let color_scale = [];
 
       map.current.on('mousemove', ['2018_emissions_outlines_cities', 'all_decades_emissions_fill'], (e, x) => {
         if (e.features.length > 0 && e.features[0].properties) {
