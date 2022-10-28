@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import * as d3 from 'd3';
 // import emissions_range from './emissions_range.json';
 import emissions_range_across_years from './emissions_range_across_years.json';
+import jenks_breaks from './jenks_distribution.json'
 
 function Menu({ show, map, cityCordinates, setVariable, setCity, setYear, setComparisionYear, setColorScale }) {
     const years = [];
@@ -111,24 +112,23 @@ function Menu({ show, map, cityCordinates, setVariable, setCity, setYear, setCom
         let emissionsLegend = [<div key="no-data"><span style={getBackgroundColor('#ffffff')}></span>No Data</div>];
 
         map.current.setFilter(layerName, ["has", property_key]);
+        const breaks = jenks_breaks[property_key]
         const style = [
             'interpolate',
             ['linear'],
             ['get', property_key]
         ];
 
-        let i = 0, greyIndex = 0, redIndex = 0, greenIndex = 0;
-        const steps = 10;
+        let greyIndex = 0, redIndex = 0, greenIndex = 0;
         const colorScheme = [];
         const diff = range.max - range.min;
-        const step = diff / 11;
         let lastColor = greys[10];
-        for (let value = range.min - step; i <= steps; i++) {
+        
+        for(let i = 1; i < breaks.length; i++){
             let color;
-            value += step;
             if (!isComparision) {
                 color = greys[greyIndex++];
-            } else if (value < 0) {
+            } else if (breaks[i] < 0) {
                 color = greens[greenIndex++];
                 lastColor = greens[greenIndex];
             } else {
@@ -136,12 +136,10 @@ function Menu({ show, map, cityCordinates, setVariable, setCity, setYear, setCom
                 lastColor = reds[redIndex];
             }
             colorScheme.push(color);
-            style.push(value, ['to-color', color]);
-            emissionsLegend.push(<div key={i}><span style={getBackgroundColor(color)}></span>{Math.round(value)}</div>)
+            style.push(breaks[i], ['to-color', color]);
+            emissionsLegend.push(<div key={i}><span style={getBackgroundColor(color)}></span>{Math.round(breaks[i-1])} to {Math.round(breaks[i])}</div>);
         }
-        colorScheme.push(lastColor);
-        style.push(range.max, ['to-color', lastColor]);
-        emissionsLegend.push(<div key={++i}><span style={getBackgroundColor(lastColor)}></span>{Math.round(range.max)}</div>)
+
         map.current.setPaintProperty(layerName, 'fill-color', style);
         const colorInterpolator = (i) => {
             if(i < 0 || i > 10) {
