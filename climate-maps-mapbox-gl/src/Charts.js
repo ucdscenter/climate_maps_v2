@@ -84,6 +84,7 @@ function showTable(data) {
     const columns = ['GEOID', 'Year', 'WHITE', 'TOTAL', 'TRANSPORT', 'FOOD', 'HOUSING',  'GOODS', 'SERVICE']
     let container = d3.select('#emissions-table')
     let table = container.append("table").classed("table", true);
+
     let thead = table.append("thead");
     let tbody = table.append("tbody");
     thead.append('tr').selectAll('th').data(columns).enter().append('th').text(c => c);
@@ -212,7 +213,7 @@ function Scatterplot(data, {
     insetBottom = inset, // inset the default y-range
     insetLeft = inset, // inset the default x-range
     width = 640, // outer width, in pixels
-    height = 400, // outer height, in pixels
+    height = 500, // outer height, in pixels
     xType = d3.scaleLinear, // type of x-scale
     xDomain, // [xmin, xmax]
     xRange = [marginLeft + insetLeft, width - marginRight - insetRight], // [left, right]
@@ -383,7 +384,6 @@ function Scatterplot(data, {
             let cScale = d3.scaleLinear().domain([1,1]).range([1,1])
             let colorS = d3.interpolateGreys;
             if (colorscheme != undefined){
-                cScale = d3.scaleLinear().domain([colorscheme[0].min, colorscheme[0].max]).range([0,1]);
                 colorS = colorscheme[1];
             }
 
@@ -413,11 +413,28 @@ function Scatterplot(data, {
                     }
                 })
                 .attr("stroke", function(d){
-                    return colorS(cScale(arrowData[d][0].y - arrowData[d][1].y))
+                    var i = 0;
+                    while(arrowData[d][1].y - arrowData[d][0].y > colorscheme[2][i]){
+                        i++;
+                    }
+                   
+                    return colorS(i)
                 })
                 .attr("stroke-opacity", .7)
                 .attr('marker-end', 'url(#arrow)')
-                .attr("class", d => 'circle-' + arrowData[d][0].id);
+                .attr("class", d => 'circle-' + arrowData[d][0].id)
+                .on("mouseover",function(e, d){
+                    console.log(arrowData[d])
+                    /*console.log(arrowData[d][1].y - arrowData[d][0].y)
+                    console.log(colorscheme[2])
+                     var i = 0;
+                    //console.log(arrowData[d][1].y - arrowData[d][1].y)
+                    while(arrowData[d][1].y - arrowData[d][0].y > colorscheme[2][i]){
+                        i++;
+                    }
+                    console.log(i)
+                    console.log(colorS(i))*/
+                })
 
         }
         else {
