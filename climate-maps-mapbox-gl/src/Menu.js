@@ -17,7 +17,7 @@ function Menu({ show, map, cityCordinates, setVariable, setCity, setYear, setCom
     const variables = ['FOOD', 'HOUSING', 'TRANSPORT', 'GOODS', 'SERVICE', 'TOTAL', 'WHITE'];
     const cities = ['-', 'Atlanta, GA', 'Boston, MA--NH--RI', 'Chicago, IL--IN', 'Cincinnati, OH--KY--IN',
         'Cleveland, OH', 'Dallas--Fort Worth--Arlington, TX', 'Denver--Aurora, CO', 'Houston, TX', 'Los Angeles--Long Beach--Anaheim, CA', 'Minneapolis--St. Paul, MN--WI',
-        'Philadelphia, PA', 'Portland, OR--WA', 'St. Louis, MO--IL']
+        'Philadelphia, PA--NJ--DE--MD', 'Portland, OR--WA', 'St. Louis, MO--IL']
     const variablesList = [];
     const citiesList = [];
     const getBackgroundColor = (color) => { return { "backgroundColor": color } };
@@ -106,7 +106,7 @@ function Menu({ show, map, cityCordinates, setVariable, setCity, setYear, setCom
         for (let i = 0; i <= 10; i++) {
             greys.push(d3.interpolateGreys(i / 10));
             reds.push(d3.interpolateReds(i / 10));
-            greens.push(d3.interpolateGreens(i / 10));
+            greens.push(d3.interpolateGreens((10 - i) / 10));
         }
 
         let emissionsLegend = [<div key="no-data"><span style={getBackgroundColor('#ffffff')}></span>No Data</div>];
@@ -145,9 +145,9 @@ function Menu({ show, map, cityCordinates, setVariable, setCity, setYear, setCom
             if(i < 0 || i > 10) {
                 return "rgb(0,0,0)";
             }
-            return colorScheme[Math.round(i*10)];
+            return colorScheme[i];
         }
-        setColorScale([range, colorInterpolator]);
+        setColorScale([range, colorInterpolator, breaks]);
         setEmissionsLegend(emissionsLegend);
         if (!showLegend) {
             setShowLegend(!showLegend);

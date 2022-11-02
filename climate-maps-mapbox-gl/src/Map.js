@@ -49,7 +49,7 @@ function Map() {
     'Boston, MA--NH--RI': { lng: -71.06392525738285, lat: 42.353758547637085 },
     'Houston, TX': { lng: -95.39933430454754, lat: 29.739488624385984 },
     'Minneapolis--St. Paul, MN--WI': { lng: -93.29106904224143, lat: 44.97973338940676 },
-    'Philadelphia, PA': { lng: -75.14812601687287, lat: 39.95366720828446 },
+    'Philadelphia, PA--NJ--DE--MD': { lng: -75.14812601687287, lat: 39.95366720828446 },
     'Portland, OR--WA': { lng: -122.66092252301331, lat: 45.52153475485946 },
   }
 
@@ -109,11 +109,11 @@ function Map() {
         'maxzoom': 13,
         filter: ["in", ['get', 'CITYNAME'], ['literal', ['Atlanta, GA', 'Los Angeles--Long Beach--Anaheim, CA', 'St. Louis, MO--IL', 'Denver--Aurora, CO', 'Chicago, IL--IN', 'Cincinnati, OH--KY--IN',
           'Dallas--Fort Worth--Arlington, TX', 'Cleveland, OH', 'Boston, MA--NH--RI', 'Houston, TX', 'Minneapolis--St. Paul, MN--WI',
-          'Philadelphia, PA', 'Portland, OR--WA']]]
+          'Philadelphia, PA--NJ--DE--MD', 'Portland, OR--WA']]]
       });
-      const cities = ['Atlanta, GA', 'Boston, MA--NH--RI', 'Chicago, IL--IN', 'Cincinnati, OH--KY--IN',
-        'Cleveland, OH', 'Dallas--Fort Worth--Arlington, TX', 'Denver--Aurora, CO', 'Houston, TX', 'Los Angeles--Long Beach--Anaheim, CA', 'Minneapolis--St. Paul, MN--WI',
-        'Philadelphia, PA', 'Portland, OR--WA', 'St. Louis, MO--IL'];
+      const cities = ['Atlanta, GA', 'Los Angeles--Long Beach--Anaheim, CA', 'St. Louis, MO--IL', 'Denver--Aurora, CO', 'Chicago, IL--IN', 'Cincinnati, OH--KY--IN',
+          'Dallas--Fort Worth--Arlington, TX', 'Cleveland, OH', 'Boston, MA--NH--RI', 'Houston, TX', 'Minneapolis--St. Paul, MN--WI',
+          'Philadelphia, PA--NJ--DE--MD', 'Portland, OR--WA'];
 
       map.current.addControl(new mapboxgl.NavigationControl());
 
@@ -231,7 +231,8 @@ function Map() {
               </div>
             </div>
             <div className="row">
-              <div id="emissions-table" className="col-12">
+              <div id="emissions-table" className="col-12" >
+
                 <h3 id="table-title"></h3>
               </div>
             </div>
