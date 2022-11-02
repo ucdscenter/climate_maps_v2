@@ -37,7 +37,7 @@ export function drawChart(height, width, data, variableX, variableY, city, svgCa
         const comparision_year_data = comparision_year != '-' ? data[comparision_year] : [];
         year_data = [...data[year].map(row => { row['Year'] = year; return row; }), ...comparision_year_data.map(row => { row['Year'] = comparision_year; return row; })];
         d3.select('#charts-title').html('% White vs Emissions in US');
-        d3.select('#table-title').html('Data');
+        d3.select('#table-title').html('Select a city to show Table');
     }
     let cachedChart = svgCache[variableX + variableY + city + year + comparision_year];
     let chartContainer = document.getElementById('white-variable');
@@ -54,10 +54,10 @@ export function drawChart(height, width, data, variableX, variableY, city, svgCa
             title: d => '',
             xLabel: `% ${variableX}`,
             yLabel: variableY,
-            stroke: "#808080",
+            stroke: "#333",
             width,
             height,
-            fill: "#808080",
+            fill: "white",
             variableX,
             variableY,
             renderCircles,
@@ -87,7 +87,8 @@ function showTable(data) {
 
     let thead = table.append("thead");
     let tbody = table.append("tbody");
-    thead.append('tr').selectAll('th').data(columns).enter().append('th').text(c => c);
+    let th = thead.append('tr').selectAll('th').data(columns).enter().append('th').text(c => c);
+
     let rows = tbody.selectAll("tr")
         .data(data)
         .enter()
@@ -104,6 +105,20 @@ function showTable(data) {
                 return percentFormat(d.value)
             }
             return emissionsFormat(d.value) });
+
+    th.on("click", function(e, d){
+        //console.log(d)
+        //d3.select(this).classed("selected-th", d3.select(this).classed("selected-th"))
+        rows.sort(function(b, a){
+            if (a[d] < b[d]){
+                return -1;
+            }
+            if (a[d] > b[d] ){
+                return 1;
+            }
+        })
+        return 0;
+    })
 }
 
 function Charts({ variable, colorScale,  hoveredTract, city, setCsv, year, comparision_year }) {
@@ -307,6 +322,14 @@ function Scatterplot(data, {
         .attr("viewBox", [0, 0, width, height])
         .attr("style", "max-width: 100%; height: auto; height: intrinsic;");
 
+     svg.append("g").attr("transform", `translate(${marginLeft},${marginTop})`)
+        .append("rect")
+        .attr("x", 0)
+        .attr("y", 0)
+        .attr("height", height - (marginBottom + marginTop))
+        .attr("width", width - (marginLeft + marginRight))
+        .style("fill", "#ddd")
+
     years.forEach(y => {
         const linedata = lineDataByYear[y];
         svg.append("path")
@@ -314,6 +337,8 @@ function Scatterplot(data, {
             .attr("class", "regression")
             .attr("d", line);
     });
+
+   
 
     svg.append("g")
         .attr("transform", `translate(0,${height - marginBottom})`)
@@ -424,16 +449,13 @@ function Scatterplot(data, {
                 .attr('marker-end', 'url(#arrow)')
                 .attr("class", d => 'circle-' + arrowData[d][0].id)
                 .on("mouseover",function(e, d){
-                    console.log(arrowData[d])
-                    /*console.log(arrowData[d][1].y - arrowData[d][0].y)
-                    console.log(colorscheme[2])
-                     var i = 0;
-                    //console.log(arrowData[d][1].y - arrowData[d][1].y)
-                    while(arrowData[d][1].y - arrowData[d][0].y > colorscheme[2][i]){
-                        i++;
-                    }
-                    console.log(i)
-                    console.log(colorS(i))*/
+                    d3.select(this).classed("circle-selected", true)
+                })
+                .on("mouseout", function(e, d){
+                    d3.select(this).classed("circle-selected", false)
+                })
+                .append("title").text( function(d){
+                    return arrowData[d][1].y + ", " + arrowData[d][0].y + "\n" + arrowData[d][1].x + ", " +  arrowData[d][0].x;
                 })
 
         }
@@ -467,7 +489,6 @@ function Scatterplot(data, {
 }
 
 function linearRegression(y, x) {
-
     let linearReg = {};
     let n = y.length;
     let sum_x = 0;

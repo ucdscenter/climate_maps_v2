@@ -133,9 +133,9 @@ code {
 
 .circle-selected {
   stroke: black;
-  stroke-width: 2;
+  stroke-width: 2.5;
   stroke-opacity : 1;
-  fill:  rgb(200, 255, 0);
+  fill:  rgb(0, 255, 0);
   opacity: 1;
 }
 
@@ -148,7 +148,7 @@ table {
   /* table-layout: fixed; */
   border-collapse: collapse;
   display: block;
-  width: 90%;
+  width: 80%;
   height: 50vh;
   border: 2px solid rgb(200, 200, 200);
   letter-spacing: 1px;
