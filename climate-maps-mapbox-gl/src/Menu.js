@@ -3,7 +3,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import * as d3 from 'd3';
 // import emissions_range from './emissions_range.json';
 import emissions_range_across_years from './emissions_range_across_years.json';
-import jenks_breaks from './jenks_distribution.json'
+// import jenks_breaks from './jenks_distribution.json'
+import jenks_distribution_across_years from './jenks_distribution_across_years.json'
 
 function Menu({ show, map, cityCordinates, setVariable, setCity, setYear, setComparisionYear, setColorScale }) {
     const years = [];
@@ -86,8 +87,8 @@ function Menu({ show, map, cityCordinates, setVariable, setCity, setYear, setCom
         let property_key = year + '-' + variable;
         const reds = [], greens = [], greys = [];
         let [range, layerName] = [emissions_range_across_years[variable], `all_decades_emissions_fill`];
-
-        if (comparision_year != '-' && comparision_year != year) {
+        let distribution_key = variable
+        if (comparision_year !== '-' && comparision_year !== year) {
             range = emissions_range_across_years['COMPARISION-' + variable];
             isComparision = true;
             const base = Number(year);
@@ -101,6 +102,7 @@ function Menu({ show, map, cityCordinates, setVariable, setCity, setYear, setCom
 
             year = base + '-' + comparision;
             property_key = year + '-' + variable;
+            distribution_key = 'COMPARISION-' + variable
         }
 
         for (let i = 0; i <= 10; i++) {
@@ -112,7 +114,7 @@ function Menu({ show, map, cityCordinates, setVariable, setCity, setYear, setCom
         let emissionsLegend = [<div key="no-data"><span style={getBackgroundColor('#ffffff')}></span>No Data</div>];
 
         map.current.setFilter(layerName, ["has", property_key]);
-        const breaks = jenks_breaks[property_key]
+        const breaks = jenks_distribution_across_years[distribution_key]
         const style = [
             'interpolate',
             ['linear'],
@@ -121,8 +123,6 @@ function Menu({ show, map, cityCordinates, setVariable, setCity, setYear, setCom
 
         let greyIndex = 0, redIndex = 0, greenIndex = 0;
         const colorScheme = [];
-        const diff = range.max - range.min;
-        let lastColor = greys[10];
         
         for(let i = 1; i < breaks.length; i++){
             let color;
@@ -130,10 +130,8 @@ function Menu({ show, map, cityCordinates, setVariable, setCity, setYear, setCom
                 color = greys[greyIndex++];
             } else if (breaks[i] < 0) {
                 color = greens[greenIndex++];
-                lastColor = greens[greenIndex];
             } else {
                 color = reds[redIndex++];
-                lastColor = reds[redIndex];
             }
             colorScheme.push(color);
             style.push(breaks[i], ['to-color', color]);
@@ -203,6 +201,7 @@ function Menu({ show, map, cityCordinates, setVariable, setCity, setYear, setCom
             </nav>
             <div id="emissions-legend" className={`legend ${showLegend ? undefined : 'hide'}`}>
                 <h4>Emissions</h4>
+                <h6 className='subheading'>(In Kilograms of CO₂)</h6>
                 {emissionsLegend}
             </div>
         </div>

@@ -30,13 +30,13 @@ export function drawChart(height, width, data, variableX, variableY, city, svgCa
         }
         // data = data.filter(row => row['CITYNAME'] == city);
         showTable(year_data);
-        d3.select('#charts-title').html('% White vs Emissions in ' + city.split(',')[0]);
+        d3.select('#charts-title').html('% White vs Emissions in ' + city.split(',')[0] + 'Kilograms CO₂');
         d3.select('#table-title').html('Data for ' + city);
         renderCircles = true;
     } else {
         const comparision_year_data = comparision_year != '-' ? data[comparision_year] : [];
         year_data = [...data[year].map(row => { row['Year'] = year; return row; }), ...comparision_year_data.map(row => { row['Year'] = comparision_year; return row; })];
-        d3.select('#charts-title').html('% White vs Emissions in US');
+        d3.select('#charts-title').html('% White vs Emissions in US (Kilograms CO₂)');
         d3.select('#table-title').html('Select a city to show Table');
     }
     let cachedChart = svgCache[variableX + variableY + city + year + comparision_year];
@@ -53,7 +53,7 @@ export function drawChart(height, width, data, variableX, variableY, city, svgCa
             y: d => Number(d[variableY]),
             title: d => '',
             xLabel: `% ${variableX}`,
-            yLabel: variableY,
+            yLabel: variableY + ' (Kilograms CO₂)',
             stroke: "#333",
             width,
             height,

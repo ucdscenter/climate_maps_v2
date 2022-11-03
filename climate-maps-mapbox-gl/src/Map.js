@@ -37,6 +37,9 @@ function Map() {
   const updateComparisionYear = useRef((data) => { console.log('comparisionYear', comparision_year); comparision_year.current = data });
   const percentFormat = d3.format('.2%')
   const emissionsFormat = d3.format('.2f')
+  const cities = useRef(['Atlanta, GA', 'Los Angeles--Long Beach--Anaheim, CA', 'St. Louis, MO--IL', 'Denver--Aurora, CO', 'Chicago, IL--IN', 'Cincinnati, OH--KY--IN',
+  'Dallas--Fort Worth--Arlington, TX', 'Cleveland, OH', 'Boston, MA--NH--RI', 'Houston, TX', 'Minneapolis--St. Paul, MN--WI',
+  'Philadelphia, PA--NJ--DE--MD', 'Portland, OR--WA']);
   const cityCordinates = {
     'Atlanta, GA': { lng: -84.32691971071415, lat: 33.759365066102475 },
     'Los Angeles--Long Beach--Anaheim, CA': { lng: -118.09434620224866, lat: 33.96924960228989 },
@@ -111,9 +114,6 @@ function Map() {
           'Dallas--Fort Worth--Arlington, TX', 'Cleveland, OH', 'Boston, MA--NH--RI', 'Houston, TX', 'Minneapolis--St. Paul, MN--WI',
           'Philadelphia, PA--NJ--DE--MD', 'Portland, OR--WA']]]
       });
-      const cities = ['Atlanta, GA', 'Los Angeles--Long Beach--Anaheim, CA', 'St. Louis, MO--IL', 'Denver--Aurora, CO', 'Chicago, IL--IN', 'Cincinnati, OH--KY--IN',
-          'Dallas--Fort Worth--Arlington, TX', 'Cleveland, OH', 'Boston, MA--NH--RI', 'Houston, TX', 'Minneapolis--St. Paul, MN--WI',
-          'Philadelphia, PA--NJ--DE--MD', 'Portland, OR--WA'];
 
       map.current.addControl(new mapboxgl.NavigationControl());
 
@@ -123,18 +123,18 @@ function Map() {
         let property_key = year.current + '-' + variable.current;
         let variableValue = e.features[0].properties[property_key]
 
-        const isUrbanArea = cities.includes(cityName);
+        const isUrbanArea = cities.current.includes(cityName);
         let row = csv && csv.current ? csv.current[year.current].find(data => data.GEOID == e.features[0].properties.GEOID10) : {};
         let white = row && row.WHITE //e.features[0].properties.WHITE;
 
-        let tooltip_html =`% White in ${year.current}: ${percentFormat(white)} <div> <div> ${property_key}: ${emissionsFormat(variableValue)} <div>`;
+        let tooltip_html =`% White in ${year.current}: ${percentFormat(white)} <div> <div> ${property_key}: ${emissionsFormat(variableValue)} Kilograms CO₂ <div>`;
 
         if (comparision_year.current != '-' && comparision_year.current != year.current) {
           property_key = comparision_year.current + '-' + variable.current;
           variableValue = e.features[0].properties[property_key];
           row = csv && csv.current ? csv.current[comparision_year.current].find(data => data.GEOID == e.features[0].properties.GEOID10) : {};
            white = row && row.WHITE 
-          tooltip_html += `% White in ${comparision_year.current}: ${percentFormat(white)}<div> ${property_key}: ${emissionsFormat(variableValue)} <div>`;
+          tooltip_html += `% White in ${comparision_year.current}: ${percentFormat(white)}<div> ${property_key}: ${emissionsFormat(variableValue)} Kilograms CO₂ <div>`;
         }
         console.log(city)
         
