@@ -25,8 +25,8 @@ function Map() {
   // const [csv, setCsv] = useState(null);
   const csv = useRef(null);
   const variable = useRef('TOTAL');
-  const year = useRef('2018');
-  const comparision_year = useRef('-');
+  const year = useRef('2000');
+  const comparision_year = useRef('2018');
   const color_scale = useRef(null);
   // const [variable, setVariable] = useState(null);
 

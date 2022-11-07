@@ -10,8 +10,8 @@ function Menu({ show, map, cityCordinates, setVariable, setCity, setYear, setCom
     const years = [];
     const allYears = ['1980', '1990', '2000', '2010', '2018'];
     const comparisions_years = [[<option key='comparision-default' value='-' id='comparision-default' href='#' className='active'>-</option>]]
-    let year = useRef('2018');
-    let comparision_year = useRef('-')
+    let year = useRef('2000');
+    let comparision_year = useRef('2018')
     let variable = useRef('TOTAL');
     const isInitialRender = useRef(true);
 
@@ -187,13 +187,13 @@ function Menu({ show, map, cityCordinates, setVariable, setCity, setYear, setCom
                         </select>
                     </div>
                     <div className="mb-2">
-                        <label htmlFor="comparision-years">3. Select a comparision year (optional):</label>
-                        <select className="form-select" name="comparision-years" id="comparision-years" onChange={onComparisionYearClick}>
+                        <label htmlFor="comparision-years">3. Select a comparison year (optional):</label>
+                        <select className="form-select" name="comparision-years" id="comparision-years" value={comparision_year.current} onChange={onComparisionYearClick}>
                             {comparisions_years}
                         </select>
                     </div>
                     <div className="mb-2">
-                        <label htmlFor="cities">4. Select a city:</label>
+                        <label htmlFor="cities"><b>4. Select a city:</b></label>
                         <select className="form-select" name="cities" id="cities" onChange={onCityClick}>
                             {citiesList}
                         </select>
