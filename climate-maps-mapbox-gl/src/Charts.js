@@ -1,41 +1,44 @@
 import React from 'react';
 import * as d3 from 'd3';
 import { useEffect, useRef } from 'react';
-
-export function drawChart(height, width, data, variableX, variableY, city, svgCache, year, comparision_year, colorscheme) {
-    let year_data;
+import lr_models from './lr_models.json'
+export function drawChart(height, width, data, variableX, variableY, city, svgCache, year, comparision_year, colorscheme, computed_regressions) {
+    let year_data = [];
     let renderCircles = false;
     let years = [year];
+    const columns = ['WHITE', 'TOTAL', 'TRANSPORT', 'FOOD', 'HOUSING', 'GOODS', 'SERVICE']
+    const tableData = []
     if (comparision_year != '-') {
         years.push(comparision_year);
     }
-    
+
     if (city) {
-        data[year].columns.push('Year');
-        year_data = []
-        data[year].forEach(row => {
-            if (row['CITYNAME'] == city) {
-                row['Year'] = year;
-                year_data.push(row);
-            }
+        data.forEach(row => {
+            row['Year'] = year;
+            year_data.push(row);
+            const tableRow = { 'Year': year, 'GEOID': row['GEOID'] }
+            columns.forEach(col => tableRow[col] = row[year + '_' + col])
+            tableData.push(tableRow);
         });
         if (comparision_year != '-') {
             data[comparision_year].columns.push('Year');
             data[comparision_year].forEach(row => {
-                if (row['CITYNAME'] == city) {
-                    row['Year'] = comparision_year;
-                    year_data.push(row);
-                }
+                row['Year'] = comparision_year;
+                year_data.push(row);
+                const tableRow = { 'Year': comparision_year, 'GEOID': row['GEOID'] }
+                columns.forEach(col => tableRow[col] = row[year + '_' + col])
+                tableData.push(tableRow);
             });
         }
+        data.columns.push('Year');
         // data = data.filter(row => row['CITYNAME'] == city);
-        showTable(year_data);
+        showTable(tableData);
         d3.select('#charts-title').html('% White vs Emissions in ' + city.split(',')[0] + 'Kilograms CO₂');
         d3.select('#table-title').html('Data for ' + city);
         renderCircles = true;
     } else {
-        const comparision_year_data = comparision_year != '-' ? data[comparision_year] : [];
-        year_data = [...data[year].map(row => { row['Year'] = year; return row; }), ...comparision_year_data.map(row => { row['Year'] = comparision_year; return row; })];
+        // const comparision_year_data = comparision_year != '-' ? data[comparision_year] : [];
+        // year_data = [...data[year].map(row => { row['Year'] = year; return row; }), ...comparision_year_data.map(row => { row['Year'] = comparision_year; return row; })];
         d3.select('#charts-title').html('% White vs Emissions in US (Kilograms CO₂)');
         d3.select('#table-title').html('Select a city to show Table');
     }
@@ -49,8 +52,8 @@ export function drawChart(height, width, data, variableX, variableY, city, svgCa
         chartContainer.append(cachedChart);
     } else {
         const chart = Scatterplot(year_data, {
-            x: d => Number(d[variableX]),
-            y: d => Number(d[variableY]),
+            x: d => Number(d[year + '_' + variableX]),
+            y: d => Number(d[year + '_' + variableY]),
             title: d => '',
             xLabel: `% ${variableX}`,
             yLabel: variableY + ' (Kilograms CO₂)',
@@ -62,7 +65,9 @@ export function drawChart(height, width, data, variableX, variableY, city, svgCa
             variableY,
             renderCircles,
             years,
-            colorscheme: colorscheme
+            colorscheme: colorscheme,
+            computed_regressions,
+            city
         })
 
         chartContainer.append(chart)
@@ -71,17 +76,16 @@ export function drawChart(height, width, data, variableX, variableY, city, svgCa
 }
 
 function showTable(data) {
-    const emissionsFormat = d3.format('.4s')
-    const percentFormat = d3.format('.2%')
     if (!data && !data[0]) {
         return;
     }
-
+    const emissionsFormat = d3.format('.4s')
+    const percentFormat = d3.format('.2%')
+    const columns = ['GEOID', 'Year', 'WHITE', 'TOTAL', 'TRANSPORT', 'FOOD', 'HOUSING', 'GOODS', 'SERVICE']
     const existing = d3.select('table');
     if (existing) {
         existing.remove()
     }
-    const columns = ['GEOID', 'Year', 'WHITE', 'TOTAL', 'TRANSPORT', 'FOOD', 'HOUSING',  'GOODS', 'SERVICE']
     let container = d3.select('#emissions-table')
     let table = container.append("table").classed("table", true);
 
@@ -97,23 +101,24 @@ function showTable(data) {
         .data((row) => columns.map((column) => { return { value: row[column] } }))
         .enter()
         .append("td")
-        .text(function (d, i) { 
-            if(i <= 1){
+        .text(function (d, i) {
+            if (i <= 1) {
                 return d.value;
             }
-            if(i == 2){
+            if (i == 2) {
                 return percentFormat(d.value)
             }
-            return emissionsFormat(d.value) });
+            return emissionsFormat(d.value)
+        });
 
-    th.on("click", function(e, d){
+    th.on("click", function (e, d) {
         //console.log(d)
         //d3.select(this).classed("selected-th", d3.select(this).classed("selected-th"))
-        rows.sort(function(b, a){
-            if (a[d] < b[d]){
+        rows.sort(function (b, a) {
+            if (a[d] < b[d]) {
                 return -1;
             }
-            if (a[d] > b[d] ){
+            if (a[d] > b[d]) {
                 return 1;
             }
         })
@@ -121,15 +126,16 @@ function showTable(data) {
     })
 }
 
-function Charts({ variable, colorScale,  hoveredTract, city, setCsv, year, comparision_year }) {
-
-
+function Charts({ variable, colorScale, hoveredTract, city, setCsv, year, comparision_year }) {
     //console.log('Hey', { variable, hoveredTract, city, setCsv, year, comparision_year })
     const renderedVariable = useRef(null);
     const renderedCity = useRef(null);
+    const computed_regressions = useRef(lr_models)
     const highlightedHoveredTract = useRef(null);
     const fetchedYears = useRef(new Set());
-    //console.log(city)
+    const cities = useRef(['Atlanta, GA', 'Los Angeles--Long Beach--Anaheim, CA', 'St. Louis, MO--IL', 'Denver--Aurora, CO', 'Chicago, IL--IN', 'Cincinnati, OH--KY--IN',
+        'Dallas--Fort Worth--Arlington, TX', 'Cleveland, OH', 'Boston, MA--NH--RI', 'Houston, TX', 'Minneapolis--St. Paul, MN--WI',
+        'Philadelphia, PA--NJ--DE--MD', 'Portland, OR--WA']);    //console.log(city)
     if (variable == null)
         variable = 'FOOD';
     const isInitialRender = useRef(true);
@@ -142,43 +148,34 @@ function Charts({ variable, colorScale,  hoveredTract, city, setCsv, year, compa
     //console.log(hoveredTract)
 
     useEffect(() => {
-        const yearsToFetch = []
-        if (year && !fetchedYears.current.has(year)) {
-            yearsToFetch.push(year);
-        }
-        if (comparision_year && comparision_year != '-' && !fetchedYears.current.has(comparision_year)) {
-            yearsToFetch.push(comparision_year);
-        }
         if (isInitialRender.current) {
             emissionsData.current = {};
         }
 
-        if (yearsToFetch.length) {
+        if (city && !fetchedYears.current.has(city)) {
             isInitialRender.current = false;
-            const promises = yearsToFetch.map((y) =>
-                d3.csv(`${process.env.REACT_APP_BASE_URL}/data/chart_data/` + y + `_Carbon Emission_Demographic_Cities.csv`)
-            );
-            Promise.all(promises).then((data) => {
-                isInitialRender.current = false;
-                console.log(data)
-                data.forEach((d, i) => {
-                    emissionsData.current[yearsToFetch[i]] = d
-                });
-                // emissionsData.current = data;
-                setCsv(emissionsData.current);
-                if (variable) {
-                    renderedVariable.current = variable;
-                    if (city) {
-                        renderedCity.city = city;
+            let cityState = city.split(',')
+            if (cityState && cityState[0]) {
+                d3.csv(`${process.env.REACT_APP_BASE_URL}/data/chart_data/city_data/` + cityState[0] + `.csv`).then((data) => {
+                    isInitialRender.current = false;
+                    console.log(data)
+                    emissionsData.current[cityState[0]] = data
+                    // emissionsData.current = data;
+                    setCsv(emissionsData.current);
+                    if (variable) {
+                        renderedVariable.current = variable;
+                        if (city) {
+                            renderedCity.city = city;
+                        }
+                        drawChart(400, 700, data, 'WHITE', variable, city, svgCache.current, year, comparision_year, colorscheme, computed_regressions);
                     }
-                    drawChart(400, 700, emissionsData.current, 'WHITE', variable, city, svgCache.current, year, comparision_year, colorscheme);
-                }
-            });
+                });
+            }
         } else {
             if ((renderedVariable.current != variable || renderedCity.current != city) && emissionsData.current) {
                 renderedVariable.current = variable;
                 renderedCity.current = city;
-                drawChart(400, 700, emissionsData.current, 'WHITE', variable, city, svgCache.current, year, comparision_year, colorscheme);
+                drawChart(400, 700, emissionsData.current, 'WHITE', variable, city, svgCache.current, year, comparision_year, colorscheme, computed_regressions);
             }
         }
 
@@ -248,62 +245,87 @@ function Scatterplot(data, {
     variableY,
     renderCircles,
     years,
-    colorscheme = undefined
+    colorscheme = undefined,
+    computed_regressions,
+    city
 } = {}) {
-
     // Compute values.
     // data = data.filter(d => isFinite(d));
-    let X = []//d3.map(data, x);
+    let X = [];//d3.map(data, x);
     // X = X.filter(i => isFinite(i));
-    let Y = []//d3.map(data, y);
+    let Y = [];//d3.map(data, y);
     // Y = Y.filter(i => isFinite(i));
-    let dataByYear = {}
-    let linedata = []
-    let lineDataByYear = {}
-    let lrByYear = {}
-    years.forEach(y => {
-        dataByYear[y] = { X: [], Y: [] }
-        lineDataByYear[y] = []
+    // let dataByYear = {};
+    // let linedata = [];
+    // let lineDataByYear = {};
+    // let lrByYear = {};
+    let computed_lr;
+    const lr_key = city ? city : 'all';
+    const svg = d3.create("svg")
+        .attr("width", width)
+        .attr("height", height)
+        .attr("viewBox", [0, 0, width, height])
+        .attr("style", "max-width: 100%; height: auto; height: intrinsic;");
+    svg.append("g").attr("transform", `translate(${marginLeft},${marginTop})`)
+        .append("rect")
+        .attr("x", 0)
+        .attr("y", 0)
+        .attr("height", height - (marginBottom + marginTop))
+        .attr("width", width - (marginLeft + marginRight))
+        .style("fill", "#ddd")
+
+    years.forEach(year => {
+        computed_lr = computed_regressions.current[year][lr_key][variableY][variableX]
+        X.push(computed_lr.x_ext[0]);
+        X.push(computed_lr.x_ext[1]);
+        Y.push(computed_lr.y_ext[1]);
+        Y.push(computed_lr.y_ext[0]);
+        Y.sort();
+        X.sort();
     });
+    // years.forEach(y => {
+    //     dataByYear[y] = { X: [], Y: [] }
+    //     lineDataByYear[y] = []
+    // });
 
-    data.forEach((row) => {
-        const x_row = x(row);
-        const y_row = y(row);
-        if (isFinite(x_row) && isFinite(y_row)) {
-            const current_year = row['Year'];
-            X.push(x_row);
-            Y.push(y_row);
+    // data.forEach((row) => {
+    //     const x_row = x(row);
+    //     const y_row = y(row);
+    //     if (isFinite(x_row) && isFinite(y_row)) {
+    //         const current_year = row['Year'];
+    //         X.push(x_row);
+    //         Y.push(y_row);
 
-            dataByYear[current_year]['X'].push(x_row);
-            dataByYear[current_year]['Y'].push(y_row);
-        };
-    });
+    //         dataByYear[current_year]['X'].push(x_row);
+    //         dataByYear[current_year]['Y'].push(y_row);
+    //     };
+    // });
 
-    Object.keys(lineDataByYear).forEach((value) => {
-        lrByYear[value] = linearRegression(dataByYear[value]['Y'], dataByYear[value]['X']);
-    })
+    // Object.keys(lineDataByYear).forEach((value) => {
+    //     lrByYear[value] = linearRegression(dataByYear[value]['Y'], dataByYear[value]['X']);
+    // })
     // let X_year = X.filter(i => i['Year'] == year);
     // let Y_year = Y.filter(i => i['Year'] == year);
 
-    data.forEach((row) => {
-        let lineDot = {};
-        const x_row = x(row);
-        const y_row = y(row);
-        if (isFinite(x_row) && isFinite(y_row)) {
-            const current_year = row['Year'];
-            lineDot[variableX] = x_row;
-            lineDot[variableY] = (x_row * lrByYear[current_year].slope) + lrByYear[current_year].intercept;
-            lineDataByYear[current_year].push(lineDot);
-        }
-    });
+    // data.forEach((row) => {
+    //     let lineDot = {};
+    //     const x_row = x(row);
+    //     const y_row = y(row);
+    //     if (isFinite(x_row) && isFinite(y_row)) {
+    //         const current_year = row['Year'];
+    //         lineDot[variableX] = x_row;
+    //         lineDot[variableY] = (x_row * lrByYear[current_year].slope) + lrByYear[current_year].intercept;
+    //         lineDataByYear[current_year].push(lineDot);
+    //     }
+    // });
 
-    let line = d3.line()
-        .x(function (d) { return xScale(d[variableX]); })
-        .y(function (d) { return yScale(d[variableY]); });
+    // let line = d3.line()
+    //     .x(function (d) { return xScale(d[variableX]); })
+    //     .y(function (d) { return yScale(d[variableY]); });
 
 
 
-    const T = title == null ? null : d3.map(data, title);
+    const T = title == null ? null : '';
     const I = d3.range(X.length).filter(i => !isNaN(X[i]) && !isNaN(Y[i]));
 
     // Compute default domains.
@@ -316,29 +338,16 @@ function Scatterplot(data, {
     const xAxis = d3.axisBottom(xScale).ticks(width / 80, xFormat);
     const yAxis = d3.axisLeft(yScale).ticks(height / 50, yFormat);
 
-    const svg = d3.create("svg")
-        .attr("width", width)
-        .attr("height", height)
-        .attr("viewBox", [0, 0, width, height])
-        .attr("style", "max-width: 100%; height: auto; height: intrinsic;");
 
-     svg.append("g").attr("transform", `translate(${marginLeft},${marginTop})`)
-        .append("rect")
-        .attr("x", 0)
-        .attr("y", 0)
-        .attr("height", height - (marginBottom + marginTop))
-        .attr("width", width - (marginLeft + marginRight))
-        .style("fill", "#ddd")
+    // years.forEach(y => {
+    //     const linedata = lineDataByYear[y];
+    //     svg.append("path")
+    //         .datum(linedata)
+    //         .attr("class", "regression")
+    //         .attr("d", line);
+    // });
 
-    years.forEach(y => {
-        const linedata = lineDataByYear[y];
-        svg.append("path")
-            .datum(linedata)
-            .attr("class", "regression")
-            .attr("d", line);
-    });
 
-   
 
     svg.append("g")
         .attr("transform", `translate(0,${height - marginBottom})`)
@@ -385,30 +394,30 @@ function Scatterplot(data, {
         .attr("fill", "none")
         .attr("stroke", halo)
         .attr("stroke-width", haloWidth);
-    if (renderCircles) {
 
+    if (renderCircles) {
         let arrowData = {}
 
-        data.forEach(function(d){
-            if (arrowData[d.GEOID] == undefined){
-                arrowData[d.GEOID] = [{ 'x' : x(d), 'y' : y(d), 'id' : d.GEOID}];
+        data.forEach(function (d) {
+            if (arrowData[d.GEOID] == undefined) {
+                arrowData[d.GEOID] = [{ 'x': x(d), 'y': y(d), 'id': d.GEOID }];
             }
             else {
-                arrowData[d.GEOID].push({ 'x' : x(d), 'y' : y(d), 'id' : d.GEOID})
+                arrowData[d.GEOID].push({ 'x': x(d), 'y': y(d), 'id': d.GEOID })
             }
         })
 
-        if(years.length == 2){
-            Object.keys(arrowData).forEach(function(k){
-                if(arrowData[k].length < 2){
+        if (years.length == 2) {
+            Object.keys(arrowData).forEach(function (k) {
+                if (arrowData[k].length < 2) {
                     delete arrowData[k];
-                } 
+                }
             })
 
             let arrowLine = d3.line().x(d => xScale(d.x)).y(d => yScale(d.y));
-            let cScale = d3.scaleLinear().domain([1,1]).range([1,1])
+            let cScale = d3.scaleLinear().domain([1, 1]).range([1, 1])
             let colorS = d3.interpolateGreys;
-            if (colorscheme != undefined){
+            if (colorscheme != undefined) {
                 colorS = colorscheme[1];
             }
 
@@ -432,30 +441,30 @@ function Scatterplot(data, {
                 .data(Object.keys(arrowData))
                 .enter()
                 .append("path")
-                .attr("d", function(d){
-                    if(arrowData[d].length == 2){
+                .attr("d", function (d) {
+                    if (arrowData[d].length == 2) {
                         return arrowLine(arrowData[d])
                     }
                 })
-                .attr("stroke", function(d){
+                .attr("stroke", function (d) {
                     var i = 0;
-                    while(arrowData[d][1].y - arrowData[d][0].y > colorscheme[2][i]){
+                    while (arrowData[d][1].y - arrowData[d][0].y > colorscheme[2][i]) {
                         i++;
                     }
-                   
+
                     return colorS(i)
                 })
                 .attr("stroke-opacity", .7)
                 .attr('marker-end', 'url(#arrow)')
                 .attr("class", d => 'circle-' + arrowData[d][0].id)
-                .on("mouseover",function(e, d){
+                .on("mouseover", function (e, d) {
                     d3.select(this).classed("circle-selected", true)
                 })
-                .on("mouseout", function(e, d){
+                .on("mouseout", function (e, d) {
                     d3.select(this).classed("circle-selected", false)
                 })
-                .append("title").text( function(d){
-                    return arrowData[d][1].y + ", " + arrowData[d][0].y + "\n" + arrowData[d][1].x + ", " +  arrowData[d][0].x;
+                .append("title").text(function (d) {
+                    return arrowData[d][1].y + ", " + arrowData[d][0].y + "\n" + arrowData[d][1].x + ", " + arrowData[d][0].x;
                 })
 
         }
@@ -477,14 +486,15 @@ function Scatterplot(data, {
         }
 
     }
-
-    let defined;
-    if (defined === undefined) defined = (d, i) => !isNaN(X[i]) && !isNaN(Y[i]);
-
-
-
-
-
+    // let defined;
+    // if (defined === undefined) defined = (d, i) => !isNaN(X[i]) && !isNaN(Y[i]);
+    
+    svg.append('line')
+        .style('stroke', 'black')
+        .attr('x1', X[0])
+        .attr('y1', computed_lr.slope * X[0] + computed_lr.intercept)
+        .attr('x2', X[1])
+        .attr('y2', computed_lr.slope * X[1] + computed_lr.intercept);
     return svg.node();
 }
 

@@ -4,7 +4,7 @@ import * as d3 from 'd3';
 // import emissions_range from './emissions_range.json';
 import emissions_range_across_years from './emissions_range_across_years.json';
 // import jenks_breaks from './jenks_distribution.json'
-import jenks_distribution_across_years from './jenks_distribution_across_years.json'
+import jenks_distribution_across_years from './jenks_distribution_across_years.json';
 
 function Menu({ show, map, cityCordinates, setVariable, setCity, setYear, setComparisionYear, setColorScale }) {
     const years = [];
