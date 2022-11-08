@@ -15,21 +15,18 @@ export function drawChart(height, width, data, variableX, variableY, city, svgCa
     if (city) {
         data.forEach(row => {
             row['Year'] = year;
-            year_data.push(row);
             const tableRow = { 'Year': year, 'GEOID': row['GEOID'] }
             columns.forEach(col => tableRow[col] = row[year + '_' + col])
             tableData.push(tableRow);
+            year_data.push(tableRow);
+            if (comparision_year != '-') {
+                let comparision_row = {...row, 'Year': comparision_year}
+                const comparisionTableRow = { 'Year': comparision_year, 'GEOID': row['GEOID'] }
+                columns.forEach(col => comparisionTableRow[col] = row[comparision_year + '_' + col])
+                tableData.push(comparisionTableRow);
+                year_data.push(comparisionTableRow);
+            }
         });
-        if (comparision_year != '-') {
-            data[comparision_year].columns.push('Year');
-            data[comparision_year].forEach(row => {
-                row['Year'] = comparision_year;
-                year_data.push(row);
-                const tableRow = { 'Year': comparision_year, 'GEOID': row['GEOID'] }
-                columns.forEach(col => tableRow[col] = row[year + '_' + col])
-                tableData.push(tableRow);
-            });
-        }
         data.columns.push('Year');
         // data = data.filter(row => row['CITYNAME'] == city);
         showTable(tableData);
@@ -52,8 +49,8 @@ export function drawChart(height, width, data, variableX, variableY, city, svgCa
         chartContainer.append(cachedChart);
     } else {
         const chart = Scatterplot(year_data, {
-            x: d => Number(d[year + '_' + variableX]),
-            y: d => Number(d[year + '_' + variableY]),
+            x: d => Number(d[variableX]),
+            y: d => Number(d[variableY]),
             title: d => '',
             xLabel: `% ${variableX}`,
             yLabel: variableY + ' (Kilograms CO₂)',
@@ -259,7 +256,7 @@ function Scatterplot(data, {
     // let linedata = [];
     // let lineDataByYear = {};
     // let lrByYear = {};
-    let computed_lr;
+    let computed_lrs = [];
     const lr_key = city ? city : 'all';
     const svg = d3.create("svg")
         .attr("width", width)
@@ -275,13 +272,14 @@ function Scatterplot(data, {
         .style("fill", "#ddd")
 
     years.forEach(year => {
-        computed_lr = computed_regressions.current[year][lr_key][variableY][variableX]
+        const computed_lr = computed_regressions.current[year][lr_key][variableY][variableX]
         X.push(computed_lr.x_ext[0]);
         X.push(computed_lr.x_ext[1]);
         Y.push(computed_lr.y_ext[1]);
         Y.push(computed_lr.y_ext[0]);
         Y.sort();
         X.sort();
+        computed_lrs.push(computed_lr)
     });
     // years.forEach(y => {
     //     dataByYear[y] = { X: [], Y: [] }
@@ -488,13 +486,15 @@ function Scatterplot(data, {
     }
     // let defined;
     // if (defined === undefined) defined = (d, i) => !isNaN(X[i]) && !isNaN(Y[i]);
-    
-    svg.append('line')
+
+    computed_lrs.forEach(computed_lr => {
+        svg.append('line')
         .style('stroke', 'black')
         .attr('x1', X[0])
         .attr('y1', computed_lr.slope * X[0] + computed_lr.intercept)
         .attr('x2', X[1])
         .attr('y2', computed_lr.slope * X[1] + computed_lr.intercept);
+    });
     return svg.node();
 }
 
