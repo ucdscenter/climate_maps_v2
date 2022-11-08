@@ -33,7 +33,7 @@ export function drawChart(height, width, data, variableX, variableY, city, svgCa
         data.columns.push('Year');
         // data = data.filter(row => row['CITYNAME'] == city);
         showTable(tableData);
-        d3.select('#charts-title').html('% White vs Emissions in ' + city.split(',')[0] + 'Kilograms CO₂');
+        d3.select('#charts-title').html('% White vs Emissions in ' + city.split(',')[0] + ' Kilograms CO₂');
         d3.select('#table-title').html('Data for ' + city);
         renderCircles = true;
     } else {

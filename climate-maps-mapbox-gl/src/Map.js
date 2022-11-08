@@ -24,9 +24,9 @@ function Map() {
   // TODO: Remove after new mbtiles
   // const [csv, setCsv] = useState(null);
   const csv = useRef(null);
-  const variable = useRef('FOOD');
-  const year = useRef('1980');
-  const comparision_year = useRef('-');
+  const variable = useRef('TOTAL');
+  const year = useRef('2000');
+  const comparision_year = useRef('2018');
   const color_scale = useRef(null);
   // const [variable, setVariable] = useState(null);
 
@@ -124,16 +124,13 @@ function Map() {
         let variableValue = e.features[0].properties[property_key]
 
         const isUrbanArea = cities.current.includes(cityName);
-        let row = csv && csv.current ? csv.current[year.current].find(data => data.GEOID == e.features[0].properties.GEOID10) : {};
-        let white = row && row.WHITE //e.features[0].properties.WHITE;
-
+        let white = e.features[0].properties[year.current + '-' + 'WHITE']
         let tooltip_html =`% White in ${year.current}: ${percentFormat(white)} <div> <div> ${property_key}: ${emissionsFormat(variableValue)} Kilograms CO₂ <div>`;
 
         if (comparision_year.current != '-' && comparision_year.current != year.current) {
           property_key = comparision_year.current + '-' + variable.current;
           variableValue = e.features[0].properties[property_key];
-          row = csv && csv.current ? csv.current[comparision_year.current].find(data => data.GEOID == e.features[0].properties.GEOID10) : {};
-           white = row && row.WHITE 
+           white = e.features[0].properties[comparision_year.current + '-' + 'WHITE'] 
           tooltip_html += `% White in ${comparision_year.current}: ${percentFormat(white)}<div> ${property_key}: ${emissionsFormat(variableValue)} Kilograms CO₂ <div>`;
         }
         console.log(city)
@@ -141,13 +138,6 @@ function Map() {
         //if (isUrbanArea && cityName != city.current) {
 
         if (isUrbanArea) {
-          /*const cords = cityCordinates[cityName];
-          map.current.flyTo({
-            center: [cords.lng, cords.lat],
-            zoom: 8,
-            duration: 2000,
-            essential: true,
-          });*/
           setCity(cityName);
           new mapboxgl.Popup()
             .setLngLat(e.lngLat)
@@ -197,7 +187,11 @@ function Map() {
     <div>
       <div className="container-flex">
         <div className="row">
-          <div className="col-8 h-75">
+          <div className="col-8 h-100">
+            <div id="loading-div">
+              <img className='mt-5 hide' src="/big-ajax-loader.gif" alt="loading"></img>
+            </div>
+
             <div ref={mapContainer} className='map-container'>
               <Menu 
                   show={showMenu}
@@ -231,7 +225,7 @@ function Map() {
               </div>
             </div>
             <div className="row">
-              <div id="emissions-table" className="col-12" >
+              <div id="emissions-table" className="col-11" >
 
                 <h3 id="table-title"></h3>
               </div>

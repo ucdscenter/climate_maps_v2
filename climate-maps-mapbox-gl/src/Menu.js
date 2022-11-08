@@ -10,12 +10,12 @@ function Menu({ show, map, cityCordinates, setVariable, setCity, setYear, setCom
     const years = [];
     const allYears = ['1980', '1990', '2000', '2010', '2018'];
     const comparisions_years = [[<option key='comparision-default' value='-' id='comparision-default' href='#' className='active'>-</option>]]
-    let year = useRef('1980');
-    let comparision_year = useRef('-')
-    let variable = useRef('FOOD');
+    let year = useRef('2000');
+    let comparision_year = useRef('2018')
+    let variable = useRef('TOTAL');
     const isInitialRender = useRef(true);
 
-    const variables = ['FOOD', 'HOUSING', 'TRANSPORT', 'GOODS', 'SERVICE', 'TOTAL', 'WHITE'];
+    const variables = ['FOOD', 'HOUSING', 'TRANSPORT', 'GOODS', 'SERVICE', 'TOTAL'];
     const cities = ['-', 'Atlanta, GA', 'Boston, MA--NH--RI', 'Chicago, IL--IN', 'Cincinnati, OH--KY--IN',
         'Cleveland, OH', 'Dallas--Fort Worth--Arlington, TX', 'Denver--Aurora, CO', 'Houston, TX', 'Los Angeles--Long Beach--Anaheim, CA', 'Minneapolis--St. Paul, MN--WI',
         'Philadelphia, PA--NJ--DE--MD', 'Portland, OR--WA', 'St. Louis, MO--IL']
@@ -170,30 +170,31 @@ function Menu({ show, map, cityCordinates, setVariable, setCity, setYear, setCom
         return null;
     return (
         <div className={show ? undefined : 'hide'}>
-            <img id='menu-icon' className='top-left over-map' onClick={onMenuClick.bind(this)} src='/menu-squared-48.png' alt='Menu'></img>
+           <img id='menu-icon' className='top-left over-map hide' onClick={onMenuClick.bind(this)} src='/menu-squared-48.png' alt='Menu'></img>
             <nav id='menu' className={`top-left over-map`}>
                 <div>
-                    <div>
-                        <label htmlFor="years">Select a base year:</label>
-                        <select name="years" id="years" onChange={onYearClick}>
-                            {years}
-                        </select>
-                    </div>
-                    <div>
-                        <label htmlFor="comparision-years">Select a comparision year:</label>
-                        <select name="comparision-years" id="comparision-years" onChange={onComparisionYearClick}>
-                            {comparisions_years}
-                        </select>
-                    </div>
-                    <div>
-                        <label htmlFor="variables">Select a variable:</label>
-                        <select name="variables" id="variables" onChange={onVariableClick}>
+                    <h4>Explore the Map</h4>
+                    <div className="mb-2">
+                        <label htmlFor="variables">1. Select a variable:</label>
+                        <select className="form-select" name="variables" value={variable.current} id="variables" onChange={onVariableClick}>
                             {variablesList}
                         </select>
                     </div>
-                    <div>
-                        <label htmlFor="citie">Select a city:</label>
-                        <select name="cities" id="cities" onChange={onCityClick}>
+                    <div className="mb-2">
+                        <label htmlFor="years">2. Select a base year:</label>
+                        <select className="form-select" name="years" id="years" value={year.current} onChange={onYearClick}>
+                            {years}
+                        </select>
+                    </div>
+                    <div className="mb-2">
+                        <label htmlFor="comparision-years">3. Select a comparison year (optional):</label>
+                        <select className="form-select" name="comparision-years" id="comparision-years" value={comparision_year.current} onChange={onComparisionYearClick}>
+                            {comparisions_years}
+                        </select>
+                    </div>
+                    <div className="mb-2">
+                        <label htmlFor="cities"><b>4. Select a city:</b></label>
+                        <select className="form-select" name="cities" id="cities" onChange={onCityClick}>
                             {citiesList}
                         </select>
                     </div>
