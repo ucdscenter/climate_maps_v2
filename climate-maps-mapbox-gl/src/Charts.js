@@ -6,6 +6,15 @@ export function drawChart(height, width, data, variableX, variableY, city, svgCa
     let year_data = [];
     let renderCircles = false;
     let years = [year];
+    let existing_years = ['1980', '1990', '2000', '2010', '2018'];
+
+    let yearcolors = {
+     '1980' : 'cyan',
+     '1990' : 'darkcyan',
+     '2000' : 'blue',
+     '2010' : 'darkblue',
+     '2018' : 'dodgerblue'
+    };
     const columns = ['WHITE', 'TOTAL', 'TRANSPORT', 'FOOD', 'HOUSING', 'GOODS', 'SERVICE']
     const tableData = []
     if (comparision_year != '-') {
@@ -16,28 +25,20 @@ export function drawChart(height, width, data, variableX, variableY, city, svgCa
         data.forEach(row => {
             row['Year'] = year;
             const tableRow = { 'Year': year, 'GEOID': row['GEOID'] }
-            columns.forEach(col => tableRow[col] = row[year + '_' + col])
+            existing_years.forEach(col => tableRow[col] = +row[col + '_' + variableY])
+            existing_years.forEach(col => tableRow[col + "_" + variableX] = +row[col + '_' + variableX])
             tableData.push(tableRow);
             year_data.push(tableRow);
-            if (comparision_year != '-') {
-                let comparision_row = {...row, 'Year': comparision_year}
-                const comparisionTableRow = { 'Year': comparision_year, 'GEOID': row['GEOID'] }
-                columns.forEach(col => comparisionTableRow[col] = row[comparision_year + '_' + col])
-                tableData.push(comparisionTableRow);
-                year_data.push(comparisionTableRow);
-            }
+        
         });
-        data.columns.push('Year');
-        // data = data.filter(row => row['CITYNAME'] == city);
-        showTable(tableData);
+        
+        showTable(tableData, existing_years, year, comparision_year, yearcolors);
         d3.select('#charts-title').html('% White vs Emissions in ' + city.split(',')[0] + ' Kilograms CO₂');
-        d3.select('#table-title').html('Data for ' + city);
+        d3.select('#table-title').html(variableY +' data for ' + city);
         renderCircles = true;
     } else {
-        // const comparision_year_data = comparision_year != '-' ? data[comparision_year] : [];
-        // year_data = [...data[year].map(row => { row['Year'] = year; return row; }), ...comparision_year_data.map(row => { row['Year'] = comparision_year; return row; })];
         d3.select('#charts-title').html('% White vs Emissions in US (Kilograms CO₂)');
-        d3.select('#table-title').html('Select a city to show Table');
+        d3.select('#table-title').html('Select a city to show data table');
     }
     let cachedChart = svgCache[variableX + variableY + city + year + comparision_year];
     let chartContainer = document.getElementById('white-variable');
@@ -64,7 +65,8 @@ export function drawChart(height, width, data, variableX, variableY, city, svgCa
             years,
             colorscheme: colorscheme,
             computed_regressions,
-            city
+            city,
+            yearcolors
         })
 
         chartContainer.append(chart)
@@ -72,13 +74,17 @@ export function drawChart(height, width, data, variableX, variableY, city, svgCa
     }
 }
 
-function showTable(data) {
+function showTable(data, existing_years, year, comparision_year, yearcolors) {
+    console.log(data)
     if (!data && !data[0]) {
         return;
     }
     const emissionsFormat = d3.format('.4s')
     const percentFormat = d3.format('.2%')
-    const columns = ['GEOID', 'Year', 'WHITE', 'TOTAL', 'TRANSPORT', 'FOOD', 'HOUSING', 'GOODS', 'SERVICE']
+    const columns = ['GEOID']
+    existing_years.forEach(function(y){
+        columns.push(y)
+    })
     const existing = d3.select('table');
     if (existing) {
         existing.remove()
@@ -88,7 +94,18 @@ function showTable(data) {
 
     let thead = table.append("thead");
     let tbody = table.append("tbody");
-    let th = thead.append('tr').selectAll('th').data(columns).enter().append('th').text(c => c);
+    let th = thead.append('tr')
+            .selectAll('th')
+            .data(columns).enter()
+            .append('th')
+            .style("border-bottom", function(c){
+                return "3px solid " + yearcolors[c];
+            }).text(c => c)
+            .style("border-top", function(c){
+                if(c == year || c == comparision_year){
+                    return "3px solid darkred"
+                }
+            });
 
     let rows = tbody.selectAll("tr")
         .data(data)
@@ -99,27 +116,26 @@ function showTable(data) {
         .enter()
         .append("td")
         .text(function (d, i) {
-            if (i <= 1) {
+            if (i < 1) {
                 return d.value;
             }
-            if (i == 2) {
+            /*if (i == 2) {
                 return percentFormat(d.value)
-            }
+            }*/
             return emissionsFormat(d.value)
         });
 
     th.on("click", function (e, d) {
-        //console.log(d)
-        //d3.select(this).classed("selected-th", d3.select(this).classed("selected-th"))
         rows.sort(function (b, a) {
-            if (a[d] < b[d]) {
+            return d3.ascending(a[d], b[d])
+            /*if (a[d] < b[d]) {
                 return -1;
             }
             if (a[d] > b[d]) {
                 return 1;
-            }
+            }*/
         })
-        return 0;
+        
     })
 }
 
@@ -153,7 +169,7 @@ function Charts({ variable, colorScale, hoveredTract, city, setCsv, year, compar
             isInitialRender.current = false;
             let cityState = city.split(',')
             if (cityState && cityState[0]) {
-                d3.csv(`${process.env.REACT_APP_BASE_URL}/data/chart_data/city_data/` + cityState[0] + `.csv`).then((data) => {
+                d3.csv(`${process.env.REACT_APP_BASE_URL}/data/chart_data/` + cityState[0] + `.csv`).then((data) => {
                     isInitialRender.current = false;
                     console.log(data)
                     emissionsData.current[cityState[0]] = data
@@ -244,7 +260,8 @@ function Scatterplot(data, {
     years,
     colorscheme = undefined,
     computed_regressions,
-    city
+    city,
+    yearcolors
 } = {}) {
     // Compute values.
     // data = data.filter(d => isFinite(d));
@@ -279,49 +296,7 @@ function Scatterplot(data, {
         Y.push(computed_lr.y_ext[0]);
         Y.sort();
         X.sort();
-        computed_lrs.push(computed_lr)
     });
-    // years.forEach(y => {
-    //     dataByYear[y] = { X: [], Y: [] }
-    //     lineDataByYear[y] = []
-    // });
-
-    // data.forEach((row) => {
-    //     const x_row = x(row);
-    //     const y_row = y(row);
-    //     if (isFinite(x_row) && isFinite(y_row)) {
-    //         const current_year = row['Year'];
-    //         X.push(x_row);
-    //         Y.push(y_row);
-
-    //         dataByYear[current_year]['X'].push(x_row);
-    //         dataByYear[current_year]['Y'].push(y_row);
-    //     };
-    // });
-
-    // Object.keys(lineDataByYear).forEach((value) => {
-    //     lrByYear[value] = linearRegression(dataByYear[value]['Y'], dataByYear[value]['X']);
-    // })
-    // let X_year = X.filter(i => i['Year'] == year);
-    // let Y_year = Y.filter(i => i['Year'] == year);
-
-    // data.forEach((row) => {
-    //     let lineDot = {};
-    //     const x_row = x(row);
-    //     const y_row = y(row);
-    //     if (isFinite(x_row) && isFinite(y_row)) {
-    //         const current_year = row['Year'];
-    //         lineDot[variableX] = x_row;
-    //         lineDot[variableY] = (x_row * lrByYear[current_year].slope) + lrByYear[current_year].intercept;
-    //         lineDataByYear[current_year].push(lineDot);
-    //     }
-    // });
-
-    // let line = d3.line()
-    //     .x(function (d) { return xScale(d[variableX]); })
-    //     .y(function (d) { return yScale(d[variableY]); });
-
-
 
     const T = title == null ? null : '';
     const I = d3.range(X.length).filter(i => !isNaN(X[i]) && !isNaN(Y[i]));
@@ -335,17 +310,6 @@ function Scatterplot(data, {
     const yScale = yType(yDomain, yRange);
     const xAxis = d3.axisBottom(xScale).ticks(width / 80, xFormat);
     const yAxis = d3.axisLeft(yScale).ticks(height / 50, yFormat);
-
-
-    // years.forEach(y => {
-    //     const linedata = lineDataByYear[y];
-    //     svg.append("path")
-    //         .datum(linedata)
-    //         .attr("class", "regression")
-    //         .attr("d", line);
-    // });
-
-
 
     svg.append("g")
         .attr("transform", `translate(0,${height - marginBottom})`)
@@ -395,13 +359,10 @@ function Scatterplot(data, {
 
     if (renderCircles) {
         let arrowData = {}
-
         data.forEach(function (d) {
-            if (arrowData[d.GEOID] == undefined) {
-                arrowData[d.GEOID] = [{ 'x': x(d), 'y': y(d), 'id': d.GEOID }];
-            }
-            else {
-                arrowData[d.GEOID].push({ 'x': x(d), 'y': y(d), 'id': d.GEOID })
+            arrowData[d.GEOID] = [{ 'x': d[years[0] + "_" + variableX], 'y': d[years[0]], 'id': d.GEOID }];
+            if(years.length  > 1){
+               arrowData[d.GEOID].push({ 'x': d[years[1] + "_" + variableX], 'y': d[years[1]], 'id': d.GEOID });
             }
         })
 
@@ -487,14 +448,22 @@ function Scatterplot(data, {
     // let defined;
     // if (defined === undefined) defined = (d, i) => !isNaN(X[i]) && !isNaN(Y[i]);
 
-    computed_lrs.forEach(computed_lr => {
-        svg.append('line')
-        .style('stroke', 'black')
-        .attr('x1', X[0])
-        .attr('y1', computed_lr.slope * X[0] + computed_lr.intercept)
-        .attr('x2', X[1])
-        .attr('y2', computed_lr.slope * X[1] + computed_lr.intercept);
-    });
+    //render regression lines
+    years.forEach(function(y){
+        let lr = computed_regressions.current[y][lr_key][variableY][variableX];
+        let y_vals = lr.x_ext.map(function(xe){
+            return lr.intercept + (xe * lr.slope)
+        })
+
+        svg.append("line")
+            .attr("x1", xScale(lr.x_ext[0]))
+            .attr("x2", xScale(lr.x_ext[1]))
+            .attr("y1", yScale(y_vals[0]))
+            .attr("y2", yScale(y_vals[1]))
+            .style("stroke", yearcolors[y])
+
+    })
+
     return svg.node();
 }
 
