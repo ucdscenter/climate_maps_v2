@@ -42,7 +42,8 @@ export function drawChart(height, width, data, variableX, variableY, city, svgCa
     }
     let cachedChart = svgCache[variableX + variableY + city + year + comparision_year];
     let chartContainer = document.getElementById('white-variable');
-    d3.selectAll(`.circle-selected`).classed("circle-selected", false);
+    d3.selectAll(`.circle-selected`).classed("circle-selected", false).on("mouseover", function(d){console.log(d)})
+    ;
 
     chartContainer.replaceChildren();
     if (cachedChart) {
