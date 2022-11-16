@@ -5,7 +5,6 @@ import Map from './Map.js';
 import Methods from './Methods.js';
 import About from './About.js';
 import Home from './Home.js'
-//import Chart from './Charts';
 function App() {
   return (
     <div>

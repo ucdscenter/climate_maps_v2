@@ -2,7 +2,8 @@ import React from 'react';
 import * as d3 from 'd3';
 import { useEffect, useRef } from 'react';
 import lr_models from './lr_models.json'
-export function drawChart(height, width, data, variableX, variableY, city, svgCache, year, comparision_year, colorscheme, computed_regressions) {
+export function drawChart(height, width, data, variableX, variableY, city, svgCache, year, comparision_year, colorscheme, computed_regressions, setShowLoader) {
+    setShowLoader(true);
     let year_data = [];
     let renderCircles = false;
     let years = [year];
@@ -15,7 +16,6 @@ export function drawChart(height, width, data, variableX, variableY, city, svgCa
      '2010' : 'darkblue',
      '2018' : 'dodgerblue'
     };
-    const columns = ['WHITE', 'TOTAL', 'TRANSPORT', 'FOOD', 'HOUSING', 'GOODS', 'SERVICE']
     const tableData = []
     if (comparision_year != '-') {
         years.push(comparision_year);
@@ -72,6 +72,7 @@ export function drawChart(height, width, data, variableX, variableY, city, svgCa
         chartContainer.append(chart)
         svgCache[variableX + variableY + city + year + comparision_year] = chart;
     }
+    setShowLoader(false);
 }
 
 function showTable(data, existing_years, year, comparision_year, yearcolors) {
@@ -139,7 +140,7 @@ function showTable(data, existing_years, year, comparision_year, yearcolors) {
     })
 }
 
-function Charts({ variable, colorScale, hoveredTract, city, setCsv, year, comparision_year }) {
+function Charts({ variable, colorScale, hoveredTract, city, setCsv, year, comparision_year, setShowLoader }) {
     //console.log('Hey', { variable, hoveredTract, city, setCsv, year, comparision_year })
     const renderedVariable = useRef(null);
     const renderedCity = useRef(null);
@@ -180,7 +181,7 @@ function Charts({ variable, colorScale, hoveredTract, city, setCsv, year, compar
                         if (city) {
                             renderedCity.city = city;
                         }
-                        drawChart(400, 700, data, 'WHITE', variable, city, svgCache.current, year, comparision_year, colorscheme, computed_regressions);
+                        drawChart(400, 700, data, 'WHITE', variable, city, svgCache.current, year, comparision_year, colorscheme, computed_regressions, setShowLoader);
                     }
                 });
             }
@@ -188,7 +189,7 @@ function Charts({ variable, colorScale, hoveredTract, city, setCsv, year, compar
             if ((renderedVariable.current != variable || renderedCity.current != city) && emissionsData.current) {
                 renderedVariable.current = variable;
                 renderedCity.current = city;
-                drawChart(400, 700, emissionsData.current, 'WHITE', variable, city, svgCache.current, year, comparision_year, colorscheme, computed_regressions);
+                drawChart(400, 700, emissionsData.current, 'WHITE', variable, city, svgCache.current, year, comparision_year, colorscheme, computed_regressions, setShowLoader);
             }
         }
 

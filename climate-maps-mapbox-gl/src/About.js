@@ -6,6 +6,7 @@ export default function About() {
             <p>Woolack Kim</p>
             <p>Ezra Edgerton</p>
             <p>Jennifer Latessa</p>
+            <p>Gagan Kumar Reddy Nanu</p>
         </div>
     )
 }
