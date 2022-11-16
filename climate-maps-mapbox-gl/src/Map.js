@@ -21,7 +21,8 @@ function Map() {
   const [zoom, setZoom] = useState(3.5);
   const [showMenu, setShowMenu] = useState(false);
   const [city, setCity] = useState(null);
-  const [hoveredTract, setHoveredTract] = useState(null);
+  const [hoveredTract, setHoveredTract] = useState(null)
+  const unhoverTract = useRef(null)
   // TODO: Remove after new mbtiles
   // const [csv, setCsv] = useState(null);
   const csv = useRef(null);
@@ -37,8 +38,29 @@ function Map() {
   const updateCsv = useRef((data) => { console.log('csv', csv); csv.current = data });
   const updateYear = useRef((data) => { console.log('year', year); year.current = data });
   const updateComparisionYear = useRef((data) => { console.log('comparisionYear', comparision_year); comparision_year.current = data });
-  const percentFormat = d3.format('.2%')
-  const emissionsFormat = d3.format('.2f')
+  const highlightTract = (geoid) => {
+    if (unhoverTract.current !== null) {
+      map.current.setFeatureState(
+        { source: '2018_emissions', sourceLayer: "censustracts", id: unhoverTract.current },
+        { hover: false }
+      );
+    }
+    unhoverTract.current = geoid;
+    map.current.setFeatureState(
+      { source: '2018_emissions', sourceLayer: "censustracts", id: geoid },
+      { hover: true }
+    );
+  };
+  const unhighlightTract = () => {
+    if (unhoverTract.current !== null) {
+      map.current.setFeatureState(
+        { source: '2018_emissions', sourceLayer: "censustracts", id: unhoverTract.current },
+        { hover: false }
+      );
+    }
+  };
+  const percentFormat = d3.format('.2%');
+  const emissionsFormat = d3.format('.2f');
   const cities = useRef(['Atlanta, GA', 'Los Angeles--Long Beach--Anaheim, CA', 'St. Louis, MO--IL', 'Denver--Aurora, CO', 'Chicago, IL--IN', 'Cincinnati, OH--KY--IN',
     'Dallas--Fort Worth--Arlington, TX', 'Cleveland, OH', 'Boston, MA--NH--RI', 'Houston, TX', 'Minneapolis--St. Paul, MN--WI',
     'Philadelphia, PA--NJ--DE--MD', 'Portland, OR--WA']);
@@ -81,7 +103,7 @@ function Map() {
           `${process.env.REACT_APP_TILES_URL}/data/${process.env.REACT_APP_TILES_NAME}/{z}/{x}/{y}.pbf`
         ],
         // generateId: true // Uncomment to use feature states
-
+        promoteId: 'GEOID10'
       });
 
       map.current.addLayer({
@@ -91,7 +113,11 @@ function Map() {
         "source-layer": "censustracts",
         paint: {
           'fill-color': 'transparent',
-          'fill-opacity': 0.8
+          'fill-opacity': [
+            'case',
+            ['boolean', ['feature-state', 'hover'], false],
+            1,
+            0.8],
         },
         'minzoom': 2,
         'maxzoom': 13,
@@ -154,17 +180,9 @@ function Map() {
 
       map.current.on('mousemove', ['2018_emissions_outlines_cities', 'all_decades_emissions_fill'], (e, x) => {
         if (e.features.length > 0 && e.features[0].properties) {
-          // if (hoveredTract !== null) {
-          //   map.setFeatureState(
-          //     { source: 'states', id: hoveredTract },
-          //     { hover: false }
-          //   );
-          // }
-          setHoveredTract(e.features[0].properties['GEOID10']);
-          // map.setFeatureState(
-          //   { source: 'states', id: hoveredTract },
-          //   { hover: true }
-          // );
+          const geoid = e.features[0].properties['GEOID10'];
+          highlightTract(geoid);
+          setHoveredTract(geoid);
         }
       });
 
@@ -174,6 +192,7 @@ function Map() {
 
       map.current.on('mouseleave', ['2018_emissions_outlines_cities', 'all_decades_emissions_fill'], () => {
         map.current.getCanvas().style.cursor = '';
+        unhighlightTract();
       });
 
       map.current.on('idle', function () {
@@ -204,14 +223,17 @@ function Map() {
                 setColorScale={updateColorScale.current}
                 setShowLoader={setShowLoader.current}>
               </Menu>
-              <Charts variable={variable.current}
+              <Charts
+                variable={variable.current}
                 colorScale={color_scale.current}
                 hoveredTract={hoveredTract}
                 city={city}
                 setCsv={updateCsv.current}
                 year={year.current}
                 comparision_year={comparision_year.current}
-                setShowLoader={setShowLoader.current}>
+                setShowLoader={setShowLoader.current}
+                highlightTract={highlightTract}
+                unhighlightTract={unhighlightTract}>
               </Charts>
             </div>
           </div>

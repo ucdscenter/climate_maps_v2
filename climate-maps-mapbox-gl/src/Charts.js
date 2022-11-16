@@ -2,146 +2,8 @@ import React from 'react';
 import * as d3 from 'd3';
 import { useEffect, useRef } from 'react';
 import lr_models from './lr_models.json'
-export function drawChart(height, width, data, variableX, variableY, city, svgCache, year, comparision_year, colorscheme, computed_regressions, setShowLoader) {
-    setShowLoader(true);
-    let year_data = [];
-    let renderCircles = false;
-    let years = [year];
-    let existing_years = ['1980', '1990', '2000', '2010', '2018'];
 
-    let yearcolors = {
-     '1980' : 'cyan',
-     '1990' : 'darkcyan',
-     '2000' : 'blue',
-     '2010' : 'darkblue',
-     '2018' : 'dodgerblue'
-    };
-    const tableData = []
-    if (comparision_year != '-') {
-        years.push(comparision_year);
-    }
-
-    if (city) {
-        data.forEach(row => {
-            row['Year'] = year;
-            const tableRow = { 'Year': year, 'GEOID': row['GEOID'] }
-            existing_years.forEach(col => tableRow[col] = +row[col + '_' + variableY])
-            existing_years.forEach(col => tableRow[col + "_" + variableX] = +row[col + '_' + variableX])
-            tableData.push(tableRow);
-            year_data.push(tableRow);
-        
-        });
-        
-        showTable(tableData, existing_years, year, comparision_year, yearcolors);
-        d3.select('#charts-title').html('% White vs Emissions in ' + city.split(',')[0] + ' Kilograms CO₂');
-        d3.select('#table-title').html(variableY +' data for ' + city);
-        renderCircles = true;
-    } else {
-        d3.select('#charts-title').html('% White vs Emissions in US (Kilograms CO₂)');
-        d3.select('#table-title').html('Select a city to show data table');
-    }
-    let cachedChart = svgCache[variableX + variableY + city + year + comparision_year];
-    let chartContainer = document.getElementById('white-variable');
-    d3.selectAll(`.circle-selected`).classed("circle-selected", false).on("mouseover", function(d){console.log(d)})
-    ;
-
-    chartContainer.replaceChildren();
-    if (cachedChart) {
-        chartContainer.replaceChildren();
-        chartContainer.append(cachedChart);
-    } else {
-        const chart = Scatterplot(year_data, {
-            x: d => Number(d[variableX]),
-            y: d => Number(d[variableY]),
-            title: d => '',
-            xLabel: `% ${variableX}`,
-            yLabel: variableY + ' (Kilograms CO₂)',
-            stroke: "#333",
-            width,
-            height,
-            fill: "white",
-            variableX,
-            variableY,
-            renderCircles,
-            years,
-            colorscheme: colorscheme,
-            computed_regressions,
-            city,
-            yearcolors
-        })
-
-        chartContainer.append(chart)
-        svgCache[variableX + variableY + city + year + comparision_year] = chart;
-    }
-    setShowLoader(false);
-}
-
-function showTable(data, existing_years, year, comparision_year, yearcolors) {
-    console.log(data)
-    if (!data && !data[0]) {
-        return;
-    }
-    const emissionsFormat = d3.format('.4s')
-    const percentFormat = d3.format('.2%')
-    const columns = ['GEOID']
-    existing_years.forEach(function(y){
-        columns.push(y)
-    })
-    const existing = d3.select('table');
-    if (existing) {
-        existing.remove()
-    }
-    let container = d3.select('#emissions-table')
-    let table = container.append("table").classed("table", true);
-
-    let thead = table.append("thead");
-    let tbody = table.append("tbody");
-    let th = thead.append('tr')
-            .selectAll('th')
-            .data(columns).enter()
-            .append('th')
-            .style("border-bottom", function(c){
-                return "3px solid " + yearcolors[c];
-            }).text(c => c)
-            .style("border-top", function(c){
-                if(c == year || c == comparision_year){
-                    return "3px solid darkred"
-                }
-            });
-
-    let rows = tbody.selectAll("tr")
-        .data(data)
-        .enter()
-        .append("tr");
-    rows.selectAll("td")
-        .data((row) => columns.map((column) => { return { value: row[column] } }))
-        .enter()
-        .append("td")
-        .text(function (d, i) {
-            if (i < 1) {
-                return d.value;
-            }
-            /*if (i == 2) {
-                return percentFormat(d.value)
-            }*/
-            return emissionsFormat(d.value)
-        });
-
-    th.on("click", function (e, d) {
-        rows.sort(function (b, a) {
-            return d3.ascending(a[d], b[d])
-            /*if (a[d] < b[d]) {
-                return -1;
-            }
-            if (a[d] > b[d]) {
-                return 1;
-            }*/
-        })
-        
-    })
-}
-
-function Charts({ variable, colorScale, hoveredTract, city, setCsv, year, comparision_year, setShowLoader }) {
+function Charts({ variable, colorScale, hoveredTract, city, setCsv, year, comparision_year, setShowLoader, highlightTract, unhighlightTract }) {
     //console.log('Hey', { variable, hoveredTract, city, setCsv, year, comparision_year })
     const renderedVariable = useRef(null);
     const renderedCity = useRef(null);
@@ -163,6 +25,7 @@ function Charts({ variable, colorScale, hoveredTract, city, setCsv, year, compar
     //console.log(hoveredTract)
 
     useEffect(() => {
+        console.log('Variable change din chart', variable)
         if (isInitialRender.current) {
             emissionsData.current = {};
         }
@@ -182,7 +45,7 @@ function Charts({ variable, colorScale, hoveredTract, city, setCsv, year, compar
                         if (city) {
                             renderedCity.city = city;
                         }
-                        drawChart(400, 700, data, 'WHITE', variable, city, svgCache.current, year, comparision_year, colorscheme, computed_regressions, setShowLoader);
+                        drawChart(400, 700, data, 'WHITE', variable, city, svgCache.current, year, comparision_year, colorscheme, computed_regressions, setShowLoader, {highlightTract, unhighlightTract});
                     }
                 });
             }
@@ -190,7 +53,7 @@ function Charts({ variable, colorScale, hoveredTract, city, setCsv, year, compar
             if ((renderedVariable.current != variable || renderedCity.current != city) && emissionsData.current) {
                 renderedVariable.current = variable;
                 renderedCity.current = city;
-                drawChart(400, 700, emissionsData.current, 'WHITE', variable, city, svgCache.current, year, comparision_year, colorscheme, computed_regressions, setShowLoader);
+                drawChart(400, 700, emissionsData.current, 'WHITE', variable, city, svgCache.current, year, comparision_year, colorscheme, computed_regressions, setShowLoader, {highlightTract, unhighlightTract});
             }
         }
 
@@ -220,6 +83,145 @@ function Charts({ variable, colorScale, hoveredTract, city, setCsv, year, compar
         </div> */
     );
 
+}
+
+export function drawChart(height, width, data, variableX, variableY, city, svgCache, year, comparision_year, colorscheme, computed_regressions, setShowLoader, mapHighlighter) {
+    setShowLoader(true);
+    let year_data = [];
+    let renderCircles = false;
+    let years = [year];
+    let existing_years = ['1980', '1990', '2000', '2010', '2018'];
+
+    let yearcolors = {
+        '1980': 'cyan',
+        '1990': 'darkcyan',
+        '2000': 'blue',
+        '2010': 'darkblue',
+        '2018': 'dodgerblue'
+    };
+    const tableData = []
+    if (comparision_year != '-') {
+        years.push(comparision_year);
+    }
+
+    if (city) {
+        data.forEach(row => {
+            row['Year'] = year;
+            const tableRow = { 'Year': year, 'GEOID': row['GEOID'] }
+            existing_years.forEach(col => tableRow[col] = +row[col + '_' + variableY])
+            existing_years.forEach(col => tableRow[col + "_" + variableX] = +row[col + '_' + variableX])
+            tableData.push(tableRow);
+            year_data.push(tableRow);
+
+        });
+
+        showTable(tableData, existing_years, year, comparision_year, yearcolors);
+        d3.select('#charts-title').html('% White vs Emissions in ' + city.split(',')[0] + ' Kilograms CO₂');
+        d3.select('#table-title').html(variableY + ' data for ' + city);
+        renderCircles = true;
+    } else {
+        d3.select('#charts-title').html('% White vs Emissions in US (Kilograms CO₂)');
+        d3.select('#table-title').html('Select a city to show data table');
+    }
+    let cachedChart = svgCache[variableX + variableY + city + year + comparision_year];
+    let chartContainer = document.getElementById('white-variable');
+    d3.selectAll(`.circle-selected`).classed("circle-selected", false);
+
+    chartContainer.replaceChildren();
+    if (cachedChart) {
+        chartContainer.replaceChildren();
+        chartContainer.append(cachedChart);
+    } else {
+        const chart = Scatterplot(year_data, {
+            x: d => Number(d[variableX]),
+            y: d => Number(d[variableY]),
+            title: d => '',
+            xLabel: `% ${variableX}`,
+            yLabel: variableY + ' (Kilograms CO₂)',
+            stroke: "#333",
+            width,
+            height,
+            fill: "white",
+            variableX,
+            variableY,
+            renderCircles,
+            years,
+            colorscheme: colorscheme,
+            computed_regressions,
+            city,
+            yearcolors,
+            mapHighlighter
+        })
+
+        chartContainer.append(chart)
+        svgCache[variableX + variableY + city + year + comparision_year] = chart;
+    }
+    setShowLoader(false);
+}
+
+function showTable(data, existing_years, year, comparision_year, yearcolors) {
+    console.log(data)
+    if (!data && !data[0]) {
+        return;
+    }
+    const emissionsFormat = d3.format('.4s')
+    const percentFormat = d3.format('.2%')
+    const columns = ['GEOID']
+    existing_years.forEach(function (y) {
+        columns.push(y)
+    })
+    const existing = d3.select('table');
+    if (existing) {
+        existing.remove()
+    }
+    let container = d3.select('#emissions-table')
+    let table = container.append("table").classed("table", true);
+
+    let thead = table.append("thead");
+    let tbody = table.append("tbody");
+    let th = thead.append('tr')
+        .selectAll('th')
+        .data(columns).enter()
+        .append('th')
+        .style("border-bottom", function (c) {
+            return "3px solid " + yearcolors[c];
+        }).text(c => c)
+        .style("border-top", function (c) {
+            if (c == year || c == comparision_year) {
+                return "3px solid darkred"
+            }
+        });
+
+    let rows = tbody.selectAll("tr")
+        .data(data)
+        .enter()
+        .append("tr");
+    rows.selectAll("td")
+        .data((row) => columns.map((column) => { return { value: row[column] } }))
+        .enter()
+        .append("td")
+        .text(function (d, i) {
+            if (i < 1) {
+                return d.value;
+            }
+            /*if (i == 2) {
+                return percentFormat(d.value)
+            }*/
+            return emissionsFormat(d.value)
+        });
+
+    th.on("click", function (e, d) {
+        rows.sort(function (b, a) {
+            return d3.ascending(a[d], b[d])
+            /*if (a[d] < b[d]) {
+                return -1;
+            }
+            if (a[d] > b[d]) {
+                return 1;
+            }*/
+        })
+
+    })
 }
 
 // Copyright 2021 Observable, Inc.
@@ -263,7 +265,8 @@ function Scatterplot(data, {
     colorscheme = undefined,
     computed_regressions,
     city,
-    yearcolors
+    yearcolors,
+    mapHighlighter
 } = {}) {
     // Compute values.
     // data = data.filter(d => isFinite(d));
@@ -363,8 +366,8 @@ function Scatterplot(data, {
         let arrowData = {}
         data.forEach(function (d) {
             arrowData[d.GEOID] = [{ 'x': d[years[0] + "_" + variableX], 'y': d[years[0]], 'id': d.GEOID }];
-            if(years.length  > 1){
-               arrowData[d.GEOID].push({ 'x': d[years[1] + "_" + variableX], 'y': d[years[1]], 'id': d.GEOID });
+            if (years.length > 1) {
+                arrowData[d.GEOID].push({ 'x': d[years[1] + "_" + variableX], 'y': d[years[1]], 'id': d.GEOID });
             }
         })
 
@@ -419,9 +422,11 @@ function Scatterplot(data, {
                 .attr('marker-end', 'url(#arrow)')
                 .attr("class", d => 'circle-' + arrowData[d][0].id)
                 .on("mouseover", function (e, d) {
+                    mapHighlighter.highlightTract(d);
                     d3.select(this).classed("circle-selected", true)
                 })
                 .on("mouseout", function (e, d) {
+                    mapHighlighter.unhighlightTract();
                     d3.select(this).classed("circle-selected", false)
                 })
                 .append("title").text(function (d) {
@@ -451,9 +456,9 @@ function Scatterplot(data, {
     // if (defined === undefined) defined = (d, i) => !isNaN(X[i]) && !isNaN(Y[i]);
 
     //render regression lines
-    years.forEach(function(y){
+    years.forEach(function (y) {
         let lr = computed_regressions.current[y][lr_key][variableY][variableX];
-        let y_vals = lr.x_ext.map(function(xe){
+        let y_vals = lr.x_ext.map(function (xe) {
             return lr.intercept + (xe * lr.slope)
         })
 
@@ -468,29 +473,5 @@ function Scatterplot(data, {
 
     return svg.node();
 }
-
-function linearRegression(y, x) {
-    let linearReg = {};
-    let n = y.length;
-    let sum_x = 0;
-    let sum_y = 0;
-    let sum_xy = 0;
-    let sum_xx = 0;
-    let sum_yy = 0;
-
-    for (let i = 0; i < y.length; i++) {
-        sum_x += x[i];
-        sum_y += y[i];
-        sum_xy += (x[i] * y[i]);
-        sum_xx += (x[i] * x[i]);
-        sum_yy += (y[i] * y[i]);
-    }
-
-    linearReg['slope'] = (n * sum_xy - sum_x * sum_y) / (n * sum_xx - sum_x * sum_x);
-    linearReg['intercept'] = (sum_y - linearReg.slope * sum_x) / n;
-    linearReg['r2'] = Math.pow((n * sum_xy - sum_x * sum_y) / Math.sqrt((n * sum_xx - sum_x * sum_x) * (n * sum_yy - sum_y * sum_y)), 2);
-
-    return linearReg;
-};
 
 export default Charts;
