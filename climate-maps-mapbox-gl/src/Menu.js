@@ -86,6 +86,7 @@ function Menu({ show, map, cityCordinates, setVariable, setCity, setYear, setCom
         let isComparision = false
         let property_key = year + '-' + variable;
         const reds = [], greens = [], greys = [];
+        const ylorrd = [];
         let [range, layerName] = [emissions_range_across_years[variable], `all_decades_emissions_fill`];
         let distribution_key = variable
         if (comparision_year !== '-' && comparision_year !== year) {
@@ -109,6 +110,8 @@ function Menu({ show, map, cityCordinates, setVariable, setCity, setYear, setCom
             greys.push(d3.interpolateGreys(i / 10));
             reds.push(d3.interpolateReds(i / 10));
             greens.push(d3.interpolateGreens((10 - i) / 10));
+            ylorrd.push(d3.interpolateYlOrRd(i / 10))
+
         }
 
         let emissionsLegend = [<div key="no-data"><span style={getBackgroundColor('#ffffff')}></span>No Data</div>];
@@ -128,11 +131,15 @@ function Menu({ show, map, cityCordinates, setVariable, setCity, setYear, setCom
             let color;
             if (!isComparision) {
                 color = greys[greyIndex++];
-            } else if (breaks[i] < 0) {
+            }
+            else{
+                color = ylorrd[greyIndex++];
+            }
+            /* else if (breaks[i] < 0) {
                 color = greens[greenIndex++];
             } else {
                 color = reds[redIndex++];
-            }
+            }*/
             colorScheme.push(color);
             style.push(breaks[i], ['to-color', color]);
             emissionsLegend.push(<div key={i}><span style={getBackgroundColor(color)}></span>{Math.round(breaks[i-1])} to {Math.round(breaks[i])}</div>);
