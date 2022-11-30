@@ -28,6 +28,14 @@
   color: #61dafb;
 }
 
+.last-updated-date {
+  font-size: 14px;
+  color: #444;
+  padding-right: 5px;
+}
+li {
+  font-size: x-large;
+}
 
 @keyframes App-logo-spin {
   from {

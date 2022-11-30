@@ -14,7 +14,7 @@ function App() {
           <div id="nav-content">
             <span id="nav-title">
               <h1>Historical CO2 Emissions</h1>
-              <p>decanal CO2 emissions across different sources, by census tract</p>
+              
             </span>
             <span id="nav-links">
               <ul className="navbar-nav mr-auto ">
@@ -24,7 +24,9 @@ function App() {
                 <li className='nav-item active'> <NavLink className='nav-link' to="About">About us</NavLink></li>
               </ul>
             </span>
+            
           </div>
+          <p align='right' className="last-updated-date">Last updated 20 November 2022</p>
         </nav>
         <Routes>
           <Route path="/" element={<Home/>} />
