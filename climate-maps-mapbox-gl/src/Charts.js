@@ -6,6 +6,8 @@ import lr_models from './lr_models.json'
 function Charts({ variable, colorScale, hoveredTract, city, setCsv, year, comparision_year, setShowLoader, highlightTract, unhighlightTract }) {
     //console.log('Hey', { variable, hoveredTract, city, setCsv, year, comparision_year })
     const renderedVariable = useRef(null);
+    const renderedYear = useRef(null);
+    const renderedComparisionYear = useRef(null);
     const renderedCity = useRef(null);
     const computed_regressions = useRef(lr_models)
     const highlightedHoveredTract = useRef(null);
@@ -18,16 +20,14 @@ function Charts({ variable, colorScale, hoveredTract, city, setCsv, year, compar
     const isInitialRender = useRef(true);
     let emissionsData = useRef(null);
     const svgCache = useRef({});
-    // const [data, setData] = useState([]);
     const renderedCharts = false;
     const colorscheme = colorScale
-    //console.log('variable ', variable)
-    //console.log(hoveredTract)
 
     useEffect(() => {
-        console.log('Variable change din chart', variable)
+        console.log('Change in chart', variable, year, comparision_year)
         if (isInitialRender.current) {
             emissionsData.current = {};
+            isInitialRender.current = false;
         }
 
         if (city && !fetchedYears.current.has(city)) {
@@ -45,15 +45,15 @@ function Charts({ variable, colorScale, hoveredTract, city, setCsv, year, compar
                         if (city) {
                             renderedCity.city = city;
                         }
-                        drawChart(400, 700, data, 'WHITE', variable, city, svgCache.current, year, comparision_year, colorscheme, computed_regressions, setShowLoader, {highlightTract, unhighlightTract});
+                        drawChart(400, 700, data, 'WHITE', variable, city, svgCache.current, year, comparision_year, colorscheme, computed_regressions, setShowLoader, { highlightTract, unhighlightTract });
                     }
                 });
             }
         } else {
-            if ((renderedVariable.current != variable || renderedCity.current != city) && emissionsData.current) {
+            if ((renderedVariable.current != variable || renderedCity.current != city || renderedYear.current != year || renderedComparisionYear.current != comparision_year) && emissionsData.current) {
                 renderedVariable.current = variable;
                 renderedCity.current = city;
-                drawChart(400, 700, emissionsData.current, 'WHITE', variable, city, svgCache.current, year, comparision_year, colorscheme, computed_regressions, setShowLoader, {highlightTract, unhighlightTract});
+                drawChart(400, 700, emissionsData.current, 'WHITE', variable, city, svgCache.current, year, comparision_year, colorscheme, computed_regressions, setShowLoader, { highlightTract, unhighlightTract });
             }
         }
 

@@ -23,21 +23,15 @@ function Map() {
   const [city, setCity] = useState(null);
   const [hoveredTract, setHoveredTract] = useState(null)
   const unhoverTract = useRef(null)
-  // TODO: Remove after new mbtiles
-  // const [csv, setCsv] = useState(null);
   const csv = useRef(null);
-  const variable = useRef('TOTAL');
-  const year = useRef('2000');
-  const comparision_year = useRef('2018');
+  const [variable, updateVariable] = useState('TOTAL');
+  const [year, updateYear] = useState('2000');
+  const [comparision_year, updateComparisionYear] = useState('2018');
   const color_scale = useRef(null);
-  // const [variable, setVariable] = useState(null);
   const showLoader = useRef(true);
   const setShowLoader = useRef((show) => { showLoader.current = show; });
-  const updateVariable = useRef((v) => { variable.current = v; console.log('set state of variable', v) });
   const updateColorScale = useRef((s) => { color_scale.current = s });
   const updateCsv = useRef((data) => { console.log('csv', csv); csv.current = data });
-  const updateYear = useRef((data) => { console.log('year', year); year.current = data });
-  const updateComparisionYear = useRef((data) => { console.log('comparisionYear', comparision_year); comparision_year.current = data });
   const highlightTract = (geoid) => {
     if (unhoverTract.current !== null) {
       map.current.setFeatureState(
@@ -147,18 +141,18 @@ function Map() {
       map.current.on('click', ['all_decades_emissions_fill', '2018_emissions_outlines_cities'], (e) => {
         console.log(e.features[0])
         const cityName = e.features[0].properties.CITYNAME;
-        let property_key = year.current + '-' + variable.current;
+        let property_key = year + '-' + variable;
         let variableValue = e.features[0].properties[property_key]
 
         const isUrbanArea = cities.current.includes(cityName);
-        let white = e.features[0].properties[year.current + '-' + 'WHITE']
-        let tooltip_html = `% White in ${year.current}: ${percentFormat(white)} <div> <div> ${property_key}: ${emissionsFormat(variableValue)} Kilograms CO₂ <div>`;
+        let white = e.features[0].properties[year + '-' + 'WHITE']
+        let tooltip_html = `% White in ${year}: ${percentFormat(white)} <div> <div> ${property_key}: ${emissionsFormat(variableValue)} Kilograms CO₂ <div>`;
 
-        if (comparision_year.current != '-' && comparision_year.current != year.current) {
-          property_key = comparision_year.current + '-' + variable.current;
+        if (comparision_year != '-' && comparision_year != year) {
+          property_key = comparision_year + '-' + variable;
           variableValue = e.features[0].properties[property_key];
-          white = e.features[0].properties[comparision_year.current + '-' + 'WHITE']
-          tooltip_html += `% White in ${comparision_year.current}: ${percentFormat(white)}<div> ${property_key}: ${emissionsFormat(variableValue)} Kilograms CO₂ <div>`;
+          white = e.features[0].properties[comparision_year + '-' + 'WHITE']
+          tooltip_html += `% White in ${comparision_year}: ${percentFormat(white)}<div> ${property_key}: ${emissionsFormat(variableValue)} Kilograms CO₂ <div>`;
         }
         console.log(city)
 
@@ -216,21 +210,21 @@ function Map() {
                 show={showMenu}
                 map={map}
                 cityCordinates={cityCordinates}
-                setVariable={updateVariable.current}
+                setVariable={updateVariable}
                 setCity={setCity}
-                setYear={updateYear.current}
-                setComparisionYear={updateComparisionYear.current}
+                setYear={updateYear}
+                setComparisionYear={updateComparisionYear}
                 setColorScale={updateColorScale.current}
                 setShowLoader={setShowLoader.current}>
               </Menu>
               <Charts
-                variable={variable.current}
+                variable={variable}
                 colorScale={color_scale.current}
                 hoveredTract={hoveredTract}
                 city={city}
                 setCsv={updateCsv.current}
-                year={year.current}
-                comparision_year={comparision_year.current}
+                year={year}
+                comparision_year={comparision_year}
                 setShowLoader={setShowLoader.current}
                 highlightTract={highlightTract}
                 unhighlightTract={unhighlightTract}>

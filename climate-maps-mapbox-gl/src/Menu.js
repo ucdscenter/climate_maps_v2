@@ -98,6 +98,7 @@ function Menu({ show, map, cityCordinates, setVariable, setCity, setYear, setCom
 
             if (base > comparision) {
                 alert('Base year must be before the comparision year.');
+                setComparisionYear('-');
                 return;
             }
 
