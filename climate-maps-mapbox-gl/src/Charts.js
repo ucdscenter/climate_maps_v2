@@ -183,6 +183,7 @@ function showTable(data, existing_years, year, comparision_year, yearcolors) {
         .selectAll('th')
         .data(columns).enter()
         .append('th')
+        .attr("class", "th")
         .style("border-bottom", function (c) {
             return "3px solid " + yearcolors[c];
         }).text(c => c)
@@ -195,11 +196,13 @@ function showTable(data, existing_years, year, comparision_year, yearcolors) {
     let rows = tbody.selectAll("tr")
         .data(data)
         .enter()
-        .append("tr");
+        .append("tr")
+        .attr("class", "tr");
     rows.selectAll("td")
         .data((row) => columns.map((column) => { return { value: row[column] } }))
         .enter()
         .append("td")
+        .attr("class", "td")
         .text(function (d, i) {
             if (i < 1) {
                 return d.value;
