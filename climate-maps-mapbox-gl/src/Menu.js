@@ -6,7 +6,7 @@ import emissions_range_across_years from './emissions_range_across_years.json';
 // import jenks_breaks from './jenks_distribution.json'
 import jenks_distribution_across_years from './jenks_distribution_across_years.json';
 
-function Menu({ show, map, cityCordinates, setVariable, setCity, setYear, setComparisionYear, setColorScale }) {
+function Menu({ show, map, cityCordinates, setVariable, setCity, setYear, setComparisionYear, setColorScale, setRefYear, setRefComparisonYear, setRefVariable }) {
     const years = [];
     const allYears = ['1980', '1990', '2000', '2010', '2018'];
     const comparisions_years = [[<option key='comparision-default' value='-' id='comparision-default' href='#' className='active'>-</option>]]
@@ -44,17 +44,20 @@ function Menu({ show, map, cityCordinates, setVariable, setCity, setYear, setCom
 
         variable.current = e.target.value;
         setVariable(variable.current);
+        setRefVariable(variable.current);
         setPaintProperty(year.current, comparision_year.current, variable.current);
     };
     const onYearClick = (e) => {
         year.current = e.target.value;
-        setYear(year.current)
+        setYear(year.current);
+        setRefYear(year.current);
         setPaintProperty(year.current, comparision_year.current, variable.current);
     };
 
     const onComparisionYearClick = (e) => {
         comparision_year.current = e.target.value;
         setComparisionYear(comparision_year.current);
+        setRefComparisonYear(comparision_year.current);
         setPaintProperty(year.current, comparision_year.current, variable.current);
     };
 
@@ -127,13 +130,13 @@ function Menu({ show, map, cityCordinates, setVariable, setCity, setYear, setCom
 
         let greyIndex = 0, redIndex = 0, greenIndex = 0;
         const colorScheme = [];
-        
-        for(let i = 1; i < breaks.length; i++){
+
+        for (let i = 1; i < breaks.length; i++) {
             let color;
             if (!isComparision) {
                 color = greys[greyIndex++];
             }
-            else{
+            else {
                 color = ylorrd[greyIndex++];
             }
             /* else if (breaks[i] < 0) {
@@ -143,13 +146,13 @@ function Menu({ show, map, cityCordinates, setVariable, setCity, setYear, setCom
             }*/
             colorScheme.push(color);
             style.push(breaks[i], ['to-color', color]);
-            emissionsLegend.push(<div key={i}><span style={getBackgroundColor(color)}></span>{Math.round(breaks[i-1])} to {Math.round(breaks[i])}</div>);
+            emissionsLegend.push(<div key={i}><span style={getBackgroundColor(color)}></span>{Math.round(breaks[i - 1])} to {Math.round(breaks[i])}</div>);
         }
         console.log(style)
         style = ['case', ['boolean', ['feature-state', 'hover'], false], 'black', style]
         map.current.setPaintProperty(layerName, 'fill-color', style);
         const colorInterpolator = (i) => {
-            if(i < 0 || i > 10) {
+            if (i < 0 || i > 10) {
                 return "rgb(0,0,0)";
             }
             return colorScheme[i];
@@ -179,7 +182,7 @@ function Menu({ show, map, cityCordinates, setVariable, setCity, setYear, setCom
         return null;
     return (
         <div className={show ? undefined : 'hide'}>
-           <img id='menu-icon' className='top-left over-map hide' onClick={onMenuClick.bind(this)} src='/menu-squared-48.png' alt='Menu'></img>
+            <img id='menu-icon' className='top-left over-map hide' onClick={onMenuClick.bind(this)} src='/menu-squared-48.png' alt='Menu'></img>
             <nav id='menu' className={`top-left over-map`}>
                 <div>
                     <h4>Explore the Map</h4>

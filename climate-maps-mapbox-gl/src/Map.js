@@ -15,23 +15,29 @@ function Map() {
   mapboxgl.accessToken = process.env.REACT_APP_MAPBOX_API_KEY;
   const mapContainer = useRef(null);
   const map = useRef(null);
+  const refYear = useRef('2000')
+  const refComparisionYear = useRef('2018')
+  const refVariable = useRef('TOTAL')
+  const [year, updateYear] = useState('2000');
   const isIntialLoad = useRef(true);
-  const [lng, setLng] = useState(-93.9);
-  const [lat, setLat] = useState(40.35);
-  const [zoom, setZoom] = useState(3.5);
+  const lng = -93.9;
+  const lat = 40.35;
+  const zoom = 3.5;
   const [showMenu, setShowMenu] = useState(false);
   const [city, setCity] = useState(null);
-  const [hoveredTract, setHoveredTract] = useState(null)
-  const unhoverTract = useRef(null)
-  const csv = useRef(null);
+  const [hoveredTract, setHoveredTract] = useState(null);
+  const unhoverTract = useRef(null);
   const [variable, updateVariable] = useState('TOTAL');
-  const [year, updateYear] = useState('2000');
+  const csv = useRef(null);
   const [comparision_year, updateComparisionYear] = useState('2018');
   const color_scale = useRef(null);
   const showLoader = useRef(true);
   const setShowLoader = useRef((show) => { showLoader.current = show; });
   const updateColorScale = useRef((s) => { color_scale.current = s });
-  const updateCsv = useRef((data) => { console.log('csv', csv); csv.current = data });
+  const updateCsv = useRef((data) => { csv.current = data });
+  const updateRefYear = useRef((data) => { refYear.current = data });
+  const updateRefComparisonYear = useRef((data) => { refComparisionYear.current = data });
+  const updateRefVariable = useRef((data) => { refVariable.current = data });
   const highlightTract = (geoid) => {
     if (unhoverTract.current !== null) {
       map.current.setFeatureState(
@@ -141,18 +147,18 @@ function Map() {
       map.current.on('click', ['all_decades_emissions_fill', '2018_emissions_outlines_cities'], (e) => {
         console.log(e.features[0])
         const cityName = e.features[0].properties.CITYNAME;
-        let property_key = year + '-' + variable;
+        let property_key = refYear.current + '-' + refVariable.current;
         let variableValue = e.features[0].properties[property_key]
 
         const isUrbanArea = cities.current.includes(cityName);
-        let white = e.features[0].properties[year + '-' + 'WHITE']
-        let tooltip_html = `% White in ${year}: ${percentFormat(white)} <div> <div> ${property_key}: ${emissionsFormat(variableValue)} Kilograms CO₂ <div>`;
+        let white = e.features[0].properties[refYear.current + '-' + 'WHITE']
+        let tooltip_html = `% White in ${refYear.current}: ${percentFormat(white)} <div> <div> ${property_key}: ${emissionsFormat(variableValue)} Kilograms CO₂ <div>`;
 
-        if (comparision_year != '-' && comparision_year != year) {
-          property_key = comparision_year + '-' + variable;
+        if (refComparisionYear.current != '-' && refComparisionYear.current != refYear.current) {
+          property_key = refComparisionYear.current + '-' + refVariable.current;
           variableValue = e.features[0].properties[property_key];
-          white = e.features[0].properties[comparision_year + '-' + 'WHITE']
-          tooltip_html += `% White in ${comparision_year}: ${percentFormat(white)}<div> ${property_key}: ${emissionsFormat(variableValue)} Kilograms CO₂ <div>`;
+          white = e.features[0].properties[refComparisionYear.current + '-' + 'WHITE']
+          tooltip_html += `% White in ${refComparisionYear.current}: ${percentFormat(white)}<div> ${property_key}: ${emissionsFormat(variableValue)} Kilograms CO₂ <div>`;
         }
         console.log(city)
 
@@ -214,6 +220,9 @@ function Map() {
                 setCity={setCity}
                 setYear={updateYear}
                 setComparisionYear={updateComparisionYear}
+                setRefVariable={updateRefVariable.current}
+                setRefYear={updateRefYear.current}
+                setRefComparisonYear={updateRefComparisonYear.current}
                 setColorScale={updateColorScale.current}
                 setShowLoader={setShowLoader.current}>
               </Menu>
