@@ -1,6 +1,6 @@
 import './App.css';
 import React from 'react';
-import { Routes, Route, MemoryRouter, NavLink } from "react-router-dom";
+import { Routes, Route, BrowserRouter, NavLink } from "react-router-dom";
 import Map from './Map.js';
 import Methods from './Methods.js';
 import About from './About.js';
@@ -8,7 +8,7 @@ import Home from './Home.js'
 function App() {
   return (
     <div>
-      <MemoryRouter>
+      <BrowserRouter>
         <nav className="navbar navbar-expand-lg navbar-light bg-light"
         >
           <div id="nav-content">
@@ -26,7 +26,7 @@ function App() {
             </span>
             
           </div>
-          <p align='right' className="last-updated-date">Last updated 01 December 2022</p>
+          <p align='right' className="last-updated-date">Last updated 05 January 2023</p>
         </nav>
         <Routes>
           <Route path="/" element={<Home/>} />
@@ -34,7 +34,7 @@ function App() {
           <Route path="methods" element={<Methods />} />
           <Route path="about" element={<About />} />
         </Routes>
-      </MemoryRouter >
+      </BrowserRouter>
     </div>
   );
 }
