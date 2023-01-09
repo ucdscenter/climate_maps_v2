@@ -201,6 +201,14 @@ td {
   overflow: auto;
 }
 
+thead {
+  position: sticky;
+  top: 0;
+  border-bottom: 2px solid #ccc;
+  background: #eee;
+}
+
+
 #nav-content {
   display: flex;
   padding-left: 1%;

@@ -1,8 +1,8 @@
 import React from 'react';
 import * as d3 from 'd3';
 import { useEffect, useRef } from 'react';
-import lr_models from './lr_models.json'
-
+import lr_models from './lr_models.json';
+import stats_across_years from './stats_across_years.json';
 function Charts({ variable, colorScale, hoveredTract, city, setCsv, year, comparision_year, setShowLoader, highlightTract, unhighlightTract }) {
     //console.log('Hey', { variable, hoveredTract, city, setCsv, year, comparision_year })
     const renderedVariable = useRef(null);
@@ -121,7 +121,8 @@ export function drawChart(height, width, data, variableX, variableY, city, svgCa
         renderCircles = true;
     } else {
         d3.select('#charts-title').html('% White vs Emissions in US (Kilograms CO₂)');
-        d3.select('#table-title').html('Select a city to show data table');
+        d3.select('#table-title').html('Data for all years');
+        showDefaultTable();
     }
     let cachedChart = svgCache[variableX + variableY + city + year + comparision_year];
     let chartContainer = document.getElementById('white-variable');
@@ -225,6 +226,55 @@ function showTable(data, existing_years, year, comparision_year, yearcolors) {
         })
 
     })
+
+}
+
+function showDefaultTable() {
+    const emissionsFormat = d3.format('.4s')
+
+    const existing = d3.select('table');
+    if (existing) {
+        existing.remove()
+    }
+
+    const columns = ['YEAR', 'MEAN', 'MEDIAN', 'MODE', 'STDDEV', 'MAX', 'MIN', 'IQR']
+
+    let container = d3.select('#emissions-table')
+    let table = container.append("table").classed("table", true);
+
+    let thead = table.append("thead");
+    let tbody = table.append("tbody");
+    let th = thead.append('tr')
+        .selectAll('th')
+        .data(columns).enter()
+        .append('th')
+        .attr("class", "th")
+        .text(c => c);
+
+    let rows = tbody.selectAll("tr")
+        .data(stats_across_years)
+        .enter()
+        .append("tr")
+        .attr("class", "tr");
+
+    rows.selectAll("td")
+        .data((row, i) => columns.map(c => stats_across_years[i][c.toLowerCase()]))
+        .enter()
+        .append("td")
+        .attr("class", "td")
+        .text(function (d, i) {
+            console.log(d, i)
+            if (i < 1) {
+                return d;
+            }
+            return emissionsFormat(d)
+        });
+
+    th.on("click", function (e, d) {
+        rows.sort(function (b, a) {
+            return d3.ascending(a[d], b[d])
+        })
+    });
 }
 
 // Copyright 2021 Observable, Inc.

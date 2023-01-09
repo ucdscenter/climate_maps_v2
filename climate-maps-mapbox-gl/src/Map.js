@@ -252,9 +252,9 @@ function Map() {
               </div>
             </div>
             <div className="row">
+              <h3 id="table-title"></h3>
               <div id="emissions-table" className="col-11" >
 
-                <h3 id="table-title"></h3>
               </div>
             </div>
           </div>

@@ -1,5 +1,7 @@
-import jenkspy
+from statistics import mean, median, mode, stdev
+# import jenkspy
 import json
+import numpy as np
 
 
 class JenksBreaks:
@@ -12,6 +14,7 @@ class JenksBreaks:
     variables = ['FOOD', 'HOUSING', 'TRANSPORT', 'GOODS', 'SERVICE', 'TOTAL']
     years_keys = []
     comparision_keys = []
+
     def __init__(self) -> None:
         self.InitKeys()
 
@@ -19,7 +22,7 @@ class JenksBreaks:
         for decade in self.decades:
             for variable in self.variables:
                 self.years_keys.append(decade+'-'+variable)
-                
+
         for comparision in self.comparisions:
             for variable in self.variables:
                 self.comparision_keys.append(comparision+'-'+variable)
@@ -43,7 +46,7 @@ class JenksBreaks:
             distribution[key] = self.GenerateBreaks(data[key], 10)
 
         self.WriteToFile('jenks-distribution.json', distribution)
-    
+
     def ComputeBreaksPerVarAcrossYears(self):
         data = {}
         distribution = {}
@@ -80,6 +83,54 @@ class JenksBreaks:
         with open(filename, 'w+') as outfile:
             json.dump(data, outfile)
 
+    def GetStats(self):
+        data = {}
+        distribution = {}
+        for file in self.files:
+            f = open(file)
+            geojson = json.load(f)
+            for feature in geojson['features']:
+                for key in self.years_keys:
+                    splits = key.split('-')
+                    # variable = splits[-1]
+                    if key not in data:
+                        data[key] = []
+                    if key in feature['properties']:
+                        data[key].append(feature['properties'][key])
+                for key in self.comparision_keys:
+                    splits = key.split('-')
+                    variable = splits[-1]
+                    data_key = 'COMPARISION-' + key
+                    if data_key not in data:
+                        data[data_key] = []
+                    if key in feature['properties']:
+                        data[data_key].append(feature['properties'][key])
+            f.close()
+        for key in data:
+            data[key] = sorted(data[key])
+            _mean = mean(data[key])
+            _median = median(data[key])
+            _mode = mode(data[key])
+            _stddev = stdev(data[key])
+            _min = data[key][0]
+            _max = data[key][-1]
+            q1 = np.percentile(data[key], 25, method='midpoint')
+            q3 = np.percentile(data[key], 75, method='midpoint')
+            _iqr = q3 - q1
+            distribution[key] = {
+                'mean': _mean,
+                'median': _median,
+                'mode': _mode,
+                'stddev': _stddev,
+                'max': _max,
+                'min': _min,
+                'iqr': _iqr
+            }
+
+        self.WriteToFile('stats-across-years.json', distribution)
+
+
 jb = JenksBreaks()
-jb.ComputeBreaksPerVarAcrossYears()
+# jb.ComputeBreaksPerVarAcrossYears()
 # jb.ComputeBreaks()
+jb.GetStats()
