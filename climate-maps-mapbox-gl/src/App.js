@@ -5,6 +5,7 @@ import Map from './Map.js';
 import Methods from './Methods.js';
 import About from './About.js';
 import Home from './Home.js'
+import Faq from './Faq';
 function App() {
   return (
     <div>
@@ -18,10 +19,11 @@ function App() {
             </span>
             <span id="nav-links">
               <ul className="navbar-nav mr-auto ">
-                <li className='nav-item active'> <NavLink className='nav-link' to="/">Home</NavLink></li>
-                <li className='nav-item active'> <NavLink className='nav-link' to="/map">Map</NavLink></li>
-                <li className='nav-item active'> <NavLink className='nav-link' to="/methods">Methods</NavLink></li>
-                <li className='nav-item active'> <NavLink className='nav-link' to="About">About us</NavLink></li>
+                <li className='nav-item active'> <NavLink className='nav-link' to="/">HOME</NavLink></li>
+                <li className='nav-item active'> <NavLink className='nav-link' to="/map">MAP</NavLink></li>
+                <li className='nav-item active'> <NavLink className='nav-link' to="/methods">METHODS</NavLink></li>
+                <li className='nav-item active'> <NavLink className='nav-link' to="About">ABOUT US</NavLink></li>
+                <li className='nav-item active'> <NavLink className='nav-link' to="/faq">FAQ</NavLink></li>
               </ul>
             </span>
             
@@ -33,6 +35,7 @@ function App() {
           <Route path="map" element={<Map />} />
           <Route path="methods" element={<Methods />} />
           <Route path="about" element={<About />} />
+          <Route path="faq" element={<Faq />} />
         </Routes>
       </BrowserRouter>
     </div>
