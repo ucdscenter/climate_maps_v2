@@ -110,11 +110,13 @@ function Menu({ show, map, cityCordinates, setVariable, setCity, setYear, setCom
             distribution_key = 'COMPARISION-' + variable
         }
 
-        for (let i = 0; i <= 10; i++) {
-            greys.push(d3.interpolateGreys(i / 10));
-            reds.push(d3.interpolateReds(i / 10));
-            greens.push(d3.interpolateGreens((10 - i) / 10));
-            ylorrd.push(d3.interpolateYlOrRd(i / 10))
+        let breaks_num = 7
+
+        for (let i = 0; i <= breaks_num; i++) {
+            greys.push(d3.interpolateGreys(i / breaks_num));
+            reds.push(d3.interpolateReds(i / breaks_num));
+            greens.push(d3.interpolateGreens((breaks_num - i) / breaks_num));
+            ylorrd.push(d3.interpolateYlOrRd(i / breaks_num))
 
         }
 
