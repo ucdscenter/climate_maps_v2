@@ -135,7 +135,7 @@ function Map() {
           'line-width': 0.5,
           'line-opacity': 0.7
         },
-        'minzoom': 2,
+        'minzoom': 7,
         'maxzoom': 13,
         filter: ["in", ['get', 'CITYNAME'], ['literal', ['Atlanta, GA', 'Los Angeles--Long Beach--Anaheim, CA', 'St. Louis, MO--IL', 'Denver--Aurora, CO', 'Chicago, IL--IN', 'Cincinnati, OH--KY--IN',
           'Dallas--Fort Worth--Arlington, TX', 'Cleveland, OH', 'Boston, MA--NH--RI', 'Houston, TX', 'Minneapolis--St. Paul, MN--WI',

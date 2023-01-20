@@ -233,12 +233,14 @@ p {
 }
 
 #loading-div {
-  left: 50%;
+  left: 30%;
   top: 40%;
   position: relative;
 }
 
-
+.selected_row {
+  border : 2px solid darkred;
+}
 .overlay {
   position: absolute;
   top: 0;

@@ -198,7 +198,18 @@ function showTable(data, existing_years, year, comparision_year, yearcolors) {
         .data(data)
         .enter()
         .append("tr")
-        .attr("class", "tr");
+        .attr("class", "tr")
+        .attr("id", function(d){
+            return "trow-" + d.GEOID;
+        })
+        .on("mouseover", function(e,d){
+            d3.select(this).classed("selected_row", true);
+            d3.select(".circle-" + d.GEOID).dispatch("mouseover")
+        })
+        .on("mouseout", function(e,d){
+            d3.select(this).classed("selected_row", false);
+            d3.select(".circle-" + d.GEOID).dispatch("mouseout")
+        });
     rows.selectAll("td")
         .data((row) => columns.map((column) => { return { value: row[column] } }))
         .enter()
@@ -263,7 +274,6 @@ function showDefaultTable() {
         .append("td")
         .attr("class", "td")
         .text(function (d, i) {
-            console.log(d, i)
             if (i < 1) {
                 return d;
             }
@@ -476,10 +486,12 @@ function Scatterplot(data, {
                 .attr("class", d => 'circle-' + arrowData[d][0].id)
                 .on("mouseover", function (e, d) {
                     mapHighlighter.highlightTract(d);
-                    d3.select(this).classed("circle-selected", true)
+                    d3.select("#trow-" + d).classed("selected_row", true);
+                    d3.select(this).classed("circle-selected", true).raise()
                 })
                 .on("mouseout", function (e, d) {
                     mapHighlighter.unhighlightTract();
+                    d3.select("#trow-" + d).classed("selected_row", false);
                     d3.select(this).classed("circle-selected", false)
                 })
                 .append("title").text(function (d) {
