@@ -18,8 +18,6 @@ export default function Home() {
             <p>
                 This website is a tool for you to see what the carbon footprint is in your community, and how that has changed over time. We also included demographic information, particularly family income, race and ethnicity, to help you consider how social factors shape our carbon consumption.
             </p>
-            <p>
-                This website is a tool for you to see the average household carbon usage in your community, and how that has changed over time. But we also wanted to consider how social and demographic factors shape carbon usage, especially race. We examined a number of variables in our research, but for this current version we show how the percentage of White residents in a given metropolitan community corresponds to household carbon use.             </p>
             <hr></hr>
             <h1>How to Use This Site  </h1>
             <p>
@@ -48,7 +46,7 @@ export default function Home() {
  <hr></hr>
 
  <h5>Feedback? </h5>
- <p>Email any feedback or specific questions and requests to gioielr@ucmail.uc.edu</p>
+ <p>Email any feedback or specific questions and requests to rob.gioielli@uc.edu</p>
 </div >
     )
 }
