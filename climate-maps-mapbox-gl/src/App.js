@@ -28,7 +28,7 @@ function App() {
             </span>
             
           </div>
-          <p align='right' className="last-updated-date">Last updated 26 January 2023</p>
+          <p align='right' className="last-updated-date">Last updated 17 February 2023</p>
         </nav>
         <Routes>
           <Route path="/" element={<Home/>} />

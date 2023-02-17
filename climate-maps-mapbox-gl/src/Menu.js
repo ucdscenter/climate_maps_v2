@@ -6,6 +6,8 @@ import emissions_range_across_years from './emissions_range_across_years.json';
 // import jenks_breaks from './jenks_distribution.json'
 import jenks_distribution_across_years from './jenks_distribution_across_years.json';
 
+import property_dist_info from './property_dist_info.json'
+
 function Menu({ show, map, cityCordinates, setVariable, setCity, setYear, setComparisionYear, setColorScale, setRefYear, setRefComparisonYear, setRefVariable }) {
     const years = [];
     const allYears = ['1980', '1990', '2000', '2010', '2018'];
@@ -119,11 +121,22 @@ function Menu({ show, map, cityCordinates, setVariable, setCity, setYear, setCom
             ylorrd.push(d3.interpolateYlOrRd(i / breaks_num))
 
         }
+                map.current.setFilter(layerName, ["has", property_key]);
+        const prop_dist = property_dist_info[property_key]
+        let emissionsLegend = [<h6 className='subheading'>mean: {Math.round(prop_dist.mean)}, stdev: {Math.round(prop_dist.std)} </h6>, <div key="no-data"><span style={getBackgroundColor('#ffffff')}></span>No Data</div>];
 
-        let emissionsLegend = [<div key="no-data"><span style={getBackgroundColor('#ffffff')}></span>No Data</div>];
-
-        map.current.setFilter(layerName, ["has", property_key]);
-        const breaks = jenks_distribution_across_years[distribution_key]
+        const groups = [-3, -2, -1, 0, 1, 2, 3]
+        const breaks = groups.map(function(p){
+            if(p == -3){
+                return prop_dist.min
+            }
+            if(p == 3){
+                return prop_dist.max
+            }
+            return prop_dist.mean + (p * prop_dist.std)
+        })
+        // const breaks = jenks_distribution_across_years[distribution_key]
+        console.log(breaks)
         let style = [
             'interpolate',
             ['linear'],
@@ -132,7 +145,6 @@ function Menu({ show, map, cityCordinates, setVariable, setCity, setYear, setCom
 
         let greyIndex = 0, redIndex = 0, greenIndex = 0;
         const colorScheme = [];
-
         for (let i = 1; i < breaks.length; i++) {
             let color;
             if (!isComparision) {
