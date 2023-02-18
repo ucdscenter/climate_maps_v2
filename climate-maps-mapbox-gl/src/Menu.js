@@ -118,14 +118,14 @@ function Menu({ show, map, cityCordinates, setVariable, setCity, setYear, setCom
             greys.push(d3.interpolateGreys(i / breaks_num));
             reds.push(d3.interpolateReds(i / breaks_num));
             greens.push(d3.interpolateGreens((breaks_num - i) / breaks_num));
-            ylorrd.push(d3.interpolateYlOrRd(i / breaks_num))
+            ylorrd.push(d3.interpolateBrBG(1 - (i / breaks_num)))
 
         }
                 map.current.setFilter(layerName, ["has", property_key]);
         const prop_dist = property_dist_info[property_key]
         let emissionsLegend = [<h6 className='subheading'>mean: {Math.round(prop_dist.mean)}, stdev: {Math.round(prop_dist.std)} </h6>, <div key="no-data"><span style={getBackgroundColor('#ffffff')}></span>No Data</div>];
 
-        const groups = [-3, -2, -1, 0, 1, 2, 3]
+        const groups = [-3, -2, -1, 0, 0.001, 1, 2, 3]
         const breaks = groups.map(function(p){
             if(p == -3){
                 return prop_dist.min
@@ -136,10 +136,10 @@ function Menu({ show, map, cityCordinates, setVariable, setCity, setYear, setCom
             return prop_dist.mean + (p * prop_dist.std)
         })
         // const breaks = jenks_distribution_across_years[distribution_key]
-        console.log(breaks)
         let style = [
-            'interpolate',
-            ['linear'],
+            //'interpolate',
+            //['linear'],
+            'step',
             ['get', property_key]
         ];
 
@@ -159,7 +159,16 @@ function Menu({ show, map, cityCordinates, setVariable, setCity, setYear, setCom
                 color = reds[redIndex++];
             }*/
             colorScheme.push(color);
-            style.push(breaks[i], ['to-color', color]);
+            // if(i < breaks.length - 1){
+            //     style.push(breaks[i], ['to-color', color]);
+            // }
+            
+            style.push(color)
+            if(i < breaks.length - 1){
+                 style.push(breaks[i])
+            }
+           
+            
             emissionsLegend.push(<div key={i}><span style={getBackgroundColor(color)}></span>{Math.round(breaks[i - 1])} to {Math.round(breaks[i])}</div>);
         }
         console.log(style)
@@ -171,7 +180,7 @@ function Menu({ show, map, cityCordinates, setVariable, setCity, setYear, setCom
             }
             return colorScheme[i];
         }
-        setColorScale([range, colorInterpolator, breaks]);
+        setColorScale([range, colorScheme, breaks]);
         setEmissionsLegend(emissionsLegend);
         if (!showLegend) {
             setShowLegend(!showLegend);

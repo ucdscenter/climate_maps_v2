@@ -36,7 +36,6 @@ function Charts({ variable, colorScale, hoveredTract, city, setCsv, year, compar
             if (cityState && cityState[0]) {
                 d3.csv(`${process.env.REACT_APP_BASE_URL}/data/chart_data/` + cityState[0] + `.csv`).then((data) => {
                     isInitialRender.current = false;
-                    console.log(data)
                     emissionsData.current[cityState[0]] = data
                     // emissionsData.current = data;
                     setCsv(emissionsData.current);
@@ -161,7 +160,6 @@ export function drawChart(height, width, data, variableX, variableY, city, svgCa
 }
 
 function showTable(data, existing_years, year, comparision_year, yearcolors) {
-    console.log(data)
     if (!data && !data[0]) {
         return;
     }
@@ -462,7 +460,7 @@ function Scatterplot(data, {
                 .attr("fill", "black")
                 .style("fill-opacity", '.5')
                 .attr("d", 'M0,-5L10,0L0,5');
-
+            console.log(colorscheme)
             svg.append("g", "arrow-group")
                 .selectAll(".chart-arrow")
                 .data(Object.keys(arrowData))
@@ -479,7 +477,7 @@ function Scatterplot(data, {
                         i++;
                     }
 
-                    return colorS(i)
+                    return colorscheme[1][i - 1]
                 })
                 .attr("stroke-opacity", .7)
                 .attr('marker-end', 'url(#arrow)')

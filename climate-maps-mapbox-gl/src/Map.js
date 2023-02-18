@@ -149,6 +149,7 @@ function Map() {
         const cityName = e.features[0].properties.CITYNAME;
         let property_key = refYear.current + '-' + refVariable.current;
         let variableValue = e.features[0].properties[property_key]
+        var change;
 
         const isUrbanArea = cities.current.includes(cityName);
         let white = e.features[0].properties[refYear.current + '-' + 'WHITE']
@@ -156,9 +157,11 @@ function Map() {
 
         if (refComparisionYear.current != '-' && refComparisionYear.current != refYear.current) {
           property_key = refComparisionYear.current + '-' + refVariable.current;
+          change = variableValue - e.features[0].properties[property_key]
           variableValue = e.features[0].properties[property_key];
+
           white = e.features[0].properties[refComparisionYear.current + '-' + 'WHITE']
-          tooltip_html += `% White in ${refComparisionYear.current}: ${percentFormat(white)}<div> ${property_key}: ${emissionsFormat(variableValue)} Kilograms CO₂ <div>`;
+          tooltip_html += `% White in ${refComparisionYear.current}: ${percentFormat(white)}<div> ${property_key}: ${emissionsFormat(variableValue)} Kilograms CO₂ ${change}<div>`;
         }
         console.log(city)
 
