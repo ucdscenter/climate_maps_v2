@@ -157,11 +157,11 @@ function Map() {
 
         if (refComparisionYear.current != '-' && refComparisionYear.current != refYear.current) {
           property_key = refComparisionYear.current + '-' + refVariable.current;
-          change = variableValue - e.features[0].properties[property_key]
+          change =  e.features[0].properties[property_key] - variableValue;
           variableValue = e.features[0].properties[property_key];
 
           white = e.features[0].properties[refComparisionYear.current + '-' + 'WHITE']
-          tooltip_html += `% White in ${refComparisionYear.current}: ${percentFormat(white)}<div> ${property_key}: ${emissionsFormat(variableValue)} Kilograms CO₂ ${change}<div>`;
+          tooltip_html += `% White in ${refComparisionYear.current}: ${percentFormat(white)}<div> ${property_key}: ${emissionsFormat(variableValue)} Kilograms CO₂ ${emissionsFormat(change)}<div>`;
         }
         console.log(city)
 
