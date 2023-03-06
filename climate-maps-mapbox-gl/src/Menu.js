@@ -121,16 +121,16 @@ function Menu({ show, map, cityCordinates, setVariable, setCity, setYear, setCom
             ylorrd.push(d3.interpolateBrBG(1 - (i / breaks_num)))
 
         }
-                map.current.setFilter(layerName, ["has", property_key]);
+        map.current.setFilter(layerName, ["has", property_key]);
         const prop_dist = property_dist_info[property_key]
         let emissionsLegend = [<h6 className='subheading'>mean: {Math.round(prop_dist.mean)}, stdev: {Math.round(prop_dist.std)} </h6>, <div key="no-data"><span style={getBackgroundColor('#ffffff')}></span>No Data</div>];
 
         const groups = [-3, -2, -1, 0, 0.001, 1, 2, 3]
-        const breaks = groups.map(function(p){
-            if(p == -3){
+        const breaks = groups.map(function (p) {
+            if (p == -3) {
                 return prop_dist.min
             }
-            if(p == 3){
+            if (p == 3) {
                 return prop_dist.max
             }
             return prop_dist.mean + (p * prop_dist.std)
@@ -162,13 +162,13 @@ function Menu({ show, map, cityCordinates, setVariable, setCity, setYear, setCom
             // if(i < breaks.length - 1){
             //     style.push(breaks[i], ['to-color', color]);
             // }
-            
+
             style.push(color)
-            if(i < breaks.length - 1){
-                 style.push(breaks[i])
+            if (i < breaks.length - 1) {
+                style.push(breaks[i])
             }
-           
-            
+
+
             emissionsLegend.push(<div key={i}><span style={getBackgroundColor(color)}></span>{Math.round(breaks[i - 1])} to {Math.round(breaks[i])}</div>);
         }
         console.log(style)
@@ -209,6 +209,7 @@ function Menu({ show, map, cityCordinates, setVariable, setCity, setYear, setCom
             <nav id='menu' className={`top-left over-map`}>
                 <div>
                     <h4>Explore the Map</h4>
+                    <h6>The neutral color is the mean of emissions for each decade and each new color is the number of standard deviations from mean.</h6>
                     <div className="mb-2">
                         <label htmlFor="variables">1. Select a variable:</label>
                         <select className="form-select" name="variables" value={variable.current} id="variables" onChange={onVariableClick}>
@@ -236,7 +237,10 @@ function Menu({ show, map, cityCordinates, setVariable, setCity, setYear, setCom
                 </div>
             </nav>
             <div id="emissions-legend" className={`legend ${showLegend ? undefined : 'hide'}`}>
-                <h4>Emissions</h4>
+                <div class="emissions-legend-title">
+                    <h4>Emissions </h4>
+                    <img className='info-icon' src='/info-circle.svg' alt='info' title='The neutral color is the mean of emissions for each decade and each new color is the number of standard deviations from mean.'/>
+                </div>
                 <h6 className='subheading'>(In Kilograms of CO₂)</h6>
                 {emissionsLegend}
             </div>

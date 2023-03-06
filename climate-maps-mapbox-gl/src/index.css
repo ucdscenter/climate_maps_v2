@@ -65,10 +65,11 @@ code {
   top: 15px;
   left: 10px;
   border-radius: 10px;
-  /* width: 120px; */
   border: 1px solid rgba(0, 0, 0, 0.4);
   font-family: 'Open Sans', sans-serif;
   padding: 10px;
+  width: 30%;
+  min-width: 360px;
 }
 
 label {
@@ -254,4 +255,23 @@ p {
 
 .disp-image {
   width: 100%;
+}
+
+.emissions-legend-title {
+  display: flex;
+  justify-content: space-between;
+}
+
+.info-icon {
+  height: 30px;
+  width: 30px;
+}
+
+.legend-tooltip {
+  display: none;
+  position: absolute
+}
+
+.info-icon:hover~.legend-tooltip {
+  display: block
 }
