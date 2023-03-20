@@ -3,6 +3,7 @@ import * as d3 from 'd3';
 import { useEffect, useRef } from 'react';
 import lr_models from './lr_models.json';
 import stats_across_years from './stats_across_years.json';
+import { supportedCities } from './constants';
 function Charts({ variable, colorScale, hoveredTract, city, setCsv, year, comparision_year, setShowLoader, highlightTract, unhighlightTract }) {
     //console.log('Hey', { variable, hoveredTract, city, setCsv, year, comparision_year })
     const renderedVariable = useRef(null);
@@ -12,9 +13,7 @@ function Charts({ variable, colorScale, hoveredTract, city, setCsv, year, compar
     const computed_regressions = useRef(lr_models)
     const highlightedHoveredTract = useRef(null);
     const fetchedYears = useRef(new Set());
-    const cities = useRef(['Atlanta, GA', 'Los Angeles--Long Beach--Anaheim, CA', 'St. Louis, MO--IL', 'Denver--Aurora, CO', 'Chicago, IL--IN', 'Cincinnati, OH--KY--IN',
-        'Dallas--Fort Worth--Arlington, TX', 'Cleveland, OH', 'Boston, MA--NH--RI', 'Houston, TX', 'Minneapolis--St. Paul, MN--WI',
-        'Philadelphia, PA--NJ--DE--MD', 'Portland, OR--WA']);    //console.log(city)
+    const cities = useRef(supportedCities);    //console.log(city)
     if (variable == null)
         variable = 'FOOD';
     const isInitialRender = useRef(true);

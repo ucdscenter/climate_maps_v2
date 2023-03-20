@@ -7,6 +7,7 @@ import Menu from './Menu';
 import * as d3 from 'd3';
 import { Loader } from './Loader';
 import mapboxgl from 'mapbox-gl'; // '!mapbox-gl';eslint-disable-line import/no-webpack-loader-syntax
+import { supportedCities, supportedCityCordinates } from './constants';
 // @ts-ignore
 // eslint-disable-next-line import/no-webpack-loader-syntax, import/no-unresolved
 mapboxgl.workerClass = require('worker-loader!mapbox-gl/dist/mapbox-gl-csp-worker').default;
@@ -61,24 +62,8 @@ function Map() {
   };
   const percentFormat = d3.format('.2%');
   const emissionsFormat = d3.format('.2f');
-  const cities = useRef(['Atlanta, GA', 'Los Angeles--Long Beach--Anaheim, CA', 'St. Louis, MO--IL', 'Denver--Aurora, CO', 'Chicago, IL--IN', 'Cincinnati, OH--KY--IN',
-    'Dallas--Fort Worth--Arlington, TX', 'Cleveland, OH', 'Boston, MA--NH--RI', 'Houston, TX', 'Minneapolis--St. Paul, MN--WI',
-    'Philadelphia, PA--NJ--DE--MD', 'Portland, OR--WA']);
-  const cityCordinates = {
-    'Atlanta, GA': { lng: -84.32691971071415, lat: 33.759365066102475 },
-    'Los Angeles--Long Beach--Anaheim, CA': { lng: -118.09434620224866, lat: 33.96924960228989 },
-    'St. Louis, MO--IL': { lng: -90.29577958396759, lat: 38.632986685626975 },
-    'Denver--Aurora, CO': { lng: -104.89981827848227, lat: 39.6333054378544 },
-    'Chicago, IL--IN': { lng: -87.83848727610835, lat: 41.839959931547156 },
-    'Cincinnati, OH--KY--IN': { lng: -84.47402669359252, lat: 39.11914999463926 },
-    'Dallas--Fort Worth--Arlington, TX': { lng: -96.94387798448972, lat: 32.78937749956576 },
-    'Cleveland, OH': { lng: -81.61977266135793, lat: 41.41286754953836 },
-    'Boston, MA--NH--RI': { lng: -71.06392525738285, lat: 42.353758547637085 },
-    'Houston, TX': { lng: -95.39933430454754, lat: 29.739488624385984 },
-    'Minneapolis--St. Paul, MN--WI': { lng: -93.29106904224143, lat: 44.97973338940676 },
-    'Philadelphia, PA--NJ--DE--MD': { lng: -75.14812601687287, lat: 39.95366720828446 },
-    'Portland, OR--WA': { lng: -122.66092252301331, lat: 45.52153475485946 },
-  }
+  const cities = useRef(supportedCities); 
+  const cityCordinates = supportedCityCordinates;
 
   if (isIntialLoad.current) {
     isIntialLoad.current = false;
@@ -137,9 +122,7 @@ function Map() {
         },
         'minzoom': 7,
         'maxzoom': 13,
-        filter: ["in", ['get', 'CITYNAME'], ['literal', ['Atlanta, GA', 'Los Angeles--Long Beach--Anaheim, CA', 'St. Louis, MO--IL', 'Denver--Aurora, CO', 'Chicago, IL--IN', 'Cincinnati, OH--KY--IN',
-          'Dallas--Fort Worth--Arlington, TX', 'Cleveland, OH', 'Boston, MA--NH--RI', 'Houston, TX', 'Minneapolis--St. Paul, MN--WI',
-          'Philadelphia, PA--NJ--DE--MD', 'Portland, OR--WA']]]
+        filter: ["in", ['get', 'CITYNAME'], ['literal', supportedCities]]
       });
 
       map.current.addControl(new mapboxgl.NavigationControl());

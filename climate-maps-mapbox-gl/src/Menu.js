@@ -7,6 +7,7 @@ import emissions_range_across_years from './emissions_range_across_years.json';
 import jenks_distribution_across_years from './jenks_distribution_across_years.json';
 
 import property_dist_info from './property_dist_info.json'
+import { supportedCities } from './constants';
 
 function Menu({ show, map, cityCordinates, setVariable, setCity, setYear, setComparisionYear, setColorScale, setRefYear, setRefComparisonYear, setRefVariable }) {
     const years = [];
@@ -18,9 +19,7 @@ function Menu({ show, map, cityCordinates, setVariable, setCity, setYear, setCom
     const isInitialRender = useRef(true);
 
     const variables = ['FOOD', 'HOUSING', 'TRANSPORT', 'GOODS', 'SERVICE', 'TOTAL'];
-    const cities = ['-', 'Atlanta, GA', 'Boston, MA--NH--RI', 'Chicago, IL--IN', 'Cincinnati, OH--KY--IN',
-        'Cleveland, OH', 'Dallas--Fort Worth--Arlington, TX', 'Denver--Aurora, CO', 'Houston, TX', 'Los Angeles--Long Beach--Anaheim, CA', 'Minneapolis--St. Paul, MN--WI',
-        'Philadelphia, PA--NJ--DE--MD', 'Portland, OR--WA', 'St. Louis, MO--IL']
+    const cities = ['-', ...supportedCities]
     const variablesList = [];
     const citiesList = [];
     const getBackgroundColor = (color) => { return { "backgroundColor": color } };
@@ -237,7 +236,7 @@ function Menu({ show, map, cityCordinates, setVariable, setCity, setYear, setCom
                 </div>
             </nav>
             <div id="emissions-legend" className={`legend ${showLegend ? undefined : 'hide'}`}>
-                <div class="emissions-legend-title">
+                <div className="emissions-legend-title">
                     <h4>Emissions </h4>
                     <img className='info-icon' src='/info-circle.svg' alt='info' title='The neutral color is the mean of emissions for each decade and each new color is the number of standard deviations from mean.'/>
                 </div>
