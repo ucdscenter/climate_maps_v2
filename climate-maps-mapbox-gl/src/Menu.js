@@ -33,6 +33,9 @@ function Menu({ show, map, cityCordinates, setVariable, setCity, setYear, setCom
             setVariable(variable.current)
             setTimeout(() =>
                 onMenuClick(), 1000);
+            setTimeout(() =>
+                onCityClick({target: {value: 'Cincinnati, OH--KY--IN'}}), 1500);
+            
         }
     });
     const onMenuClick = () => {
@@ -65,6 +68,7 @@ function Menu({ show, map, cityCordinates, setVariable, setCity, setYear, setCom
 
     const onCityClick = (e) => {
         const city = e.target.value;
+        console.log(city)
         if (city === '-') {
             setCity(null);
             map.current.flyTo({
@@ -229,7 +233,7 @@ function Menu({ show, map, cityCordinates, setVariable, setCity, setYear, setCom
                     </div>
                     <div className="mb-2">
                         <label htmlFor="cities"><b>4. Select a city:</b></label>
-                        <select className="form-select" name="cities" id="cities" onChange={onCityClick}>
+                        <select className="form-select" name="cities" id="cities" defaultValue="Cincinnati, OH--KY--IN" onChange={onCityClick}>
                             {citiesList}
                         </select>
                     </div>
