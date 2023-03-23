@@ -229,7 +229,8 @@ function Map() {
           <div className="col-4">
             <div className="row">
               <div className="col-12">
-                <h2>Charts</h2>
+                <h2>Charts <img className='info-icon' src='/info-circle-black.svg' alt='chart-info' title='If no compare year is selected, each dot represents one census tract, mouseover said dot to highlight on the map. If a comparison year is selected, each arrow represents one census tract, beginning at the base year and ending at the comparison year, showing the change in % white population as well as change in emissions. A point moving down and to the left represents a census tract the is becoming less white and emmitting less over time'/>
+            </h2>
               </div>
             </div>
             <div className="row">

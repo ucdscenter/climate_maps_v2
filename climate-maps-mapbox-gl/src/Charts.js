@@ -71,6 +71,7 @@ function Charts({ variable, colorScale, hoveredTract, city, setCsv, year, compar
     return (
         <div className="Charts over-map bottom-center">
             <div id="chart">
+            
             </div>
         </div>
         /* <div id="white-variable" className="col-6">

@@ -6,6 +6,7 @@ import Methods from './Methods.js';
 import About from './About.js';
 import Home from './Home.js'
 import Faq from './Faq';
+import Example from './Example.js';
 function App() {
   return (
     <div>
@@ -22,6 +23,7 @@ function App() {
                 <li className='nav-item active'> <NavLink className='nav-link' to="/">HOME</NavLink></li>
                 <li className='nav-item active'> <NavLink className='nav-link' to="/map">MAP</NavLink></li>
                 <li className='nav-item active'> <NavLink className='nav-link' to="/methods">METHODS</NavLink></li>
+                <li className='nav-item active'> <NavLink className='nav-link' to="/example">EXAMPLE</NavLink></li>
                 <li className='nav-item active'> <NavLink className='nav-link' to="About">ABOUT US</NavLink></li>
                 <li className='nav-item active'> <NavLink className='nav-link' to="/faq">FAQ</NavLink></li>
               </ul>
@@ -34,6 +36,7 @@ function App() {
           <Route path="/" element={<Home/>} />
           <Route path="map" element={<Map />} />
           <Route path="methods" element={<Methods />} />
+          <Route path="example" element={<Example />} />
           <Route path="about" element={<About />} />
           <Route path="faq" element={<Faq />} />
         </Routes>

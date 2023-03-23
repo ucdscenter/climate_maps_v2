@@ -212,7 +212,6 @@ function Menu({ show, map, cityCordinates, setVariable, setCity, setYear, setCom
             <nav id='menu' className={`top-left over-map`}>
                 <div>
                     <h4>Explore the Map</h4>
-                    <h6>The neutral color is the mean of emissions for each decade and each new color is the number of standard deviations from mean.</h6>
                     <div className="mb-2">
                         <label htmlFor="variables">1. Select a variable:</label>
                         <select className="form-select" name="variables" value={variable.current} id="variables" onChange={onVariableClick}>
@@ -241,10 +240,11 @@ function Menu({ show, map, cityCordinates, setVariable, setCity, setYear, setCom
             </nav>
             <div id="emissions-legend" className={`legend ${showLegend ? undefined : 'hide'}`}>
                 <div className="emissions-legend-title">
-                    <h4>Emissions </h4>
-                    <img className='info-icon' src='/info-circle.svg' alt='info' title='The neutral color is the mean of emissions for each decade and each new color is the number of standard deviations from mean.'/>
+                    <h4>Legend </h4>
+                    <img className='info-icon' src='/info-circle.svg' alt='info' title='The neutral color is the mean of emissions for each decade and each new color is one additional standard deviation from mean. Past two stdevs the limit is set to the minimum or maximum value. Sometimes the mean value is not 0 in comparisons, keep that in mind when interpreting the map'/>
                 </div>
                 <h6 className='subheading'>(In Kilograms of CO₂)</h6>
+
                 {emissionsLegend}
             </div>
         </div>
