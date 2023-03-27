@@ -178,7 +178,7 @@ function Menu({ show, map, cityCordinates, setVariable, setCity, setYear, setCom
             emissionsLegend.push(<div key={i}><span style={getBackgroundColor(color)}></span>{Math.round(breaks[i - 1])} to {Math.round(breaks[i])}</div>);
         }
         console.log(style)
-        style = ['case', ['boolean', ['feature-state', 'hover'], false], 'grey', style]
+        style = ['case', ['boolean', ['feature-state', 'hover'], false], 'black', style]
         map.current.setPaintProperty(layerName, 'fill-color', style);
         const colorInterpolator = (i) => {
             if (i < 0 || i > 10) {

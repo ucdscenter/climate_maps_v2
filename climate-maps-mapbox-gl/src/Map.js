@@ -140,12 +140,17 @@ function Map() {
           const property_key = year + '-' + refVariable.current;
           const variableValue = e.features[0].properties[property_key]
           const y = Number(emissionsFormat(variableValue));
-          if (!isNaN(y)) {
-            points.push({ x: year, y: Number(emissionsFormat(variableValue)) });
+          const white_val = e.features[0].properties[year +  '-WHITE'];
+          console.log(y)
+          console.log(white_val)
+          console.log(e.features[0].properties)
+          if (!isNaN(y) && !isNaN(white_val)) {
+            points.push({ x: year, y: [variableValue, white_val] });
           }
         });
-        const lineColor = points[0].y < points[points.length - 1].y ? 'rgb(161, 102, 27)' : 'rgb(25, 123, 115)';
-        const tooltip_html = createTooltipSvg(points, 400, 250, lineColor, '1', 'Years', `${refVariable.current} (Kilograms CO₂)`);
+        console.log(points)
+        const lineColor = ['rgb(25, 123, 115)','rgb(161, 102, 27)']//points[0].y < points[points.length - 1].y ? 'rgb(161, 102, 27)' : 'rgb(25, 123, 115)';
+        const tooltip_html = createTooltipSvg(points, 400, 250, lineColor, '1', 'Years', [`${refVariable.current} Emissions (Kilograms CO₂)`, '% White']);
         let title = isUrbanArea ? `<h6 class='map-popup-title'> CITY: ${cityName}, GEOID: ${geoid}</h6>` : `<h6 class='map-popup-title'>GEOID: ${geoid}</h6>`;
 
         new mapboxgl.Popup()
@@ -247,58 +252,94 @@ function Map() {
 
 function createTooltipSvg(points, width, height, color, strokeWidth, xLabel, yLabel) {
   console.log(points);
+  const g_height = height/2;
 
+
+  const tooltip_formats = [null, d3.format('.0%')];
+  const yearFormat = d3.format('.4');
   const r = 3;
   const marginTop = 20; 
-  const marginRight = 30; 
+  const marginRight = 10; 
   const marginBottom = 30; 
-  const marginLeft = 40; 
+  const marginLeft = 45; 
   const inset = r * 2; 
   const insetTop = inset; 
   const insetRight = inset; 
   const insetBottom = inset; 
   const insetLeft = inset; 
   const xRange = [marginLeft + insetLeft, width - marginRight - insetRight];
-  const yRange = [height - marginBottom - insetBottom, marginTop + insetTop];
+  const yRange = [g_height - marginBottom - insetBottom, marginTop + insetTop];
   const X = points.map(x => x.x).sort();
-  const xExtent = d3.extent(points, function (d) { return d.x; });
-  const yExtent = d3.extent(points, function (d) { return d.y; });
+  const xExtent =  d3.extent(points, function (d) { return d.x; });
   const xScale = d3.scaleLinear(xExtent, xRange);
-  const yScale = d3.scaleLinear(yExtent, yRange);
-  const xAxis = d3.axisBottom(xScale).tickValues(X);
-  const yAxis = d3.axisLeft(yScale).ticks(height / 50);
+  
+  const xAxis = d3.axisBottom(xScale).tickValues(X).ticks(5, yearFormat);
+  
+  const div = document.createElement('div');
 
-  const svg = d3.create("svg")
+ for (var i=0; i< 2; i++){
+
+  let yExtent = [0, 1];
+  if (i == 0){
+    yExtent = [0,d3.extent(points, function (d) { return d.y[i]; })[1]];
+  }
+  const yScale = d3.scaleLinear(yExtent, yRange);
+  const yAxis = d3.axisLeft(yScale).ticks(4, tooltip_formats[i]);
+
+  let svg = d3.create("svg")
     .attr("width", width)
-    .attr("height", height)
-    .attr("viewBox", [0, 0, width, height])
+    .attr("height", g_height)
+    .attr("viewBox", [0, 0, width, g_height])
     .attr("style", "max-width: 100%; height: auto; height: intrinsic;");
 
   svg.append("g").attr("transform", `translate(${marginLeft},${marginTop})`)
     .append("rect")
     .attr("x", 0)
     .attr("y", 0)
-    .attr("height", height - (marginBottom + marginTop))
+    .attr("height", g_height - (marginBottom + marginTop))
     .attr("width", width - (marginLeft + marginRight))
     .style("fill", "#fff")
 
-  const line = d3.line()
+
+
+  let line = d3.line()
     .x(function (d) { return xScale(d.x); })
-    .y(function (d) { return yScale(d.y); });
+    .y(function (d) { return yScale(d.y[i]); });
 
   svg.append('path')
     .datum(points)
     .attr('fill', 'none')
-    .attr('stroke', color)
+    .attr('stroke', color[i])
     .attr('stroke-width', strokeWidth)
     .attr('d', line);
 
+  svg.selectAll(".tooltip-circle")
+      .data(points)
+      .enter()
+      .append("circle")
+      .attr("cx", function(d){
+        return xScale(d.x)
+      })
+      .attr("cy", function(d){
+        return yScale(d.y[i])
+      })
+      .attr("r", 5)
+      .style("fill", color[i])
+      .append("svg:title").text(function(d){
+        if(i == 0){
+          return d3.format(.6)(d.y[i])
+        }
+        else{
+          return tooltip_formats[i](d.y[i])
+        }
+      })
+
   svg.append("g")
-    .attr("transform", `translate(0,${height - marginBottom})`)
+    .attr("transform", `translate(0,${g_height - marginBottom})`)
     .call(xAxis)
     .call(g => g.select(".domain").remove())
     .call(g => g.selectAll(".tick line").clone()
-      .attr("y2", marginTop + marginBottom - height)
+      .attr("y2", marginTop + marginBottom - g_height)
       .attr("stroke-opacity", 0.5))
     .call(g => g.append("text")
       .attr("x", width)
@@ -319,11 +360,10 @@ function createTooltipSvg(points, width, height, color, strokeWidth, xLabel, yLa
       .attr("y", 10)
       .attr("fill", "currentColor")
       .attr("text-anchor", "start")
-      .text(yLabel));
-
-
-  const div = document.createElement('div');
+      .text(yLabel[i]));
   div.appendChild(svg.node());
+
+}
   return div.innerHTML;
 }
 
