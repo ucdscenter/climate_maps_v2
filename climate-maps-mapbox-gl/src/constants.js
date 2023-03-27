@@ -60,8 +60,10 @@ export const supportedCityCordinates = {
     'San Antonio, TX': { lng: -98.491142, lat: 29.424349 },
     'San Diego, CA': { lng: -117.161087, lat: 32.715736 },
     'San Francisco--Oakland, CA': { lng: -122.446747, lat: 37.733795 },
-    'Seattle, WA': {lng: -122.335167, lat: 47.608013},
+    'Seattle, WA': { lng: -122.335167, lat: 47.608013 },
     'St. Louis, MO--IL': { lng: -90.29577958396759, lat: 38.632986685626975 },
-    'Tampa--St. Petersburg, FL': {lng: -82.452606, lat: 27.964157},
+    'Tampa--St. Petersburg, FL': { lng: -82.452606, lat: 27.964157 },
     'Washington, DC--VA--MD': { lng: -77.009056, lat: 38.889805 }
 }
+
+export const supportedYears = ['1980', '1990', '2000', '2010', '2018'];

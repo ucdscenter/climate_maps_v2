@@ -7,7 +7,7 @@ import Menu from './Menu';
 import * as d3 from 'd3';
 import { Loader } from './Loader';
 import mapboxgl from 'mapbox-gl'; // '!mapbox-gl';eslint-disable-line import/no-webpack-loader-syntax
-import { supportedCities, supportedCityCordinates } from './constants';
+import { supportedCities, supportedCityCordinates, supportedYears } from './constants';
 // @ts-ignore
 // eslint-disable-next-line import/no-webpack-loader-syntax, import/no-unresolved
 mapboxgl.workerClass = require('worker-loader!mapbox-gl/dist/mapbox-gl-csp-worker').default;
@@ -60,9 +60,10 @@ function Map() {
       );
     }
   };
+
   const percentFormat = d3.format('.2%');
   const emissionsFormat = d3.format('.2f');
-  const cities = useRef(supportedCities); 
+  const cities = useRef(supportedCities);
   const cityCordinates = supportedCityCordinates;
 
   if (isIntialLoad.current) {
@@ -130,38 +131,28 @@ function Map() {
       map.current.on('click', ['all_decades_emissions_fill', '2018_emissions_outlines_cities'], (e) => {
         console.log(e.features[0])
         const cityName = e.features[0].properties.CITYNAME;
-        let property_key = refYear.current + '-' + refVariable.current;
-        let variableValue = e.features[0].properties[property_key]
-        var change;
+        const geoid = e.features[0].properties.GEOID10;
+
 
         const isUrbanArea = cities.current.includes(cityName);
-        let white = e.features[0].properties[refYear.current + '-' + 'WHITE']
-        let tooltip_html = `% White in ${refYear.current}: ${percentFormat(white)} <div> <div> ${property_key}: ${emissionsFormat(variableValue)} Kilograms CO₂ <div>`;
+        const points = [];
+        supportedYears.forEach(year => {
+          const property_key = year + '-' + refVariable.current;
+          const variableValue = e.features[0].properties[property_key]
+          const y = Number(emissionsFormat(variableValue));
+          if (!isNaN(y)) {
+            points.push({ x: year, y: Number(emissionsFormat(variableValue)) });
+          }
+        });
+        const lineColor = points[0].y < points[points.length - 1].y ? 'rgb(161, 102, 27)' : 'rgb(25, 123, 115)';
+        const tooltip_html = createTooltipSvg(points, 400, 250, lineColor, '1', 'Years', `${refVariable.current} (Kilograms CO₂)`);
+        let title = isUrbanArea ? `<h6 class='map-popup-title'> CITY: ${cityName}, GEOID: ${geoid}</h6>` : `<h6 class='map-popup-title'>GEOID: ${geoid}</h6>`;
 
-        if (refComparisionYear.current != '-' && refComparisionYear.current != refYear.current) {
-          property_key = refComparisionYear.current + '-' + refVariable.current;
-          change =  e.features[0].properties[property_key] - variableValue;
-          variableValue = e.features[0].properties[property_key];
-
-          white = e.features[0].properties[refComparisionYear.current + '-' + 'WHITE']
-          tooltip_html += `% White in ${refComparisionYear.current}: ${percentFormat(white)}<div> ${property_key}: ${emissionsFormat(variableValue)} Kilograms CO₂ ${emissionsFormat(change)}<div>`;
-        }
-        console.log(city)
-
-        //if (isUrbanArea && cityName != city.current) {
-
-        if (isUrbanArea) {
-          setCity(cityName);
-          new mapboxgl.Popup()
-            .setLngLat(e.lngLat)
-            .setHTML(`<div> City: ${cityName}</div> <div>` + tooltip_html)
-            .addTo(map.current);
-        } else {
-          new mapboxgl.Popup()
-            .setLngLat(e.lngLat)
-            .setHTML(`<div></div> <div>` + tooltip_html)
-            .addTo(map.current);
-        }
+        new mapboxgl.Popup()
+          .addClassName('map-popup')
+          .setLngLat(e.lngLat)
+          .setHTML(title + tooltip_html)
+          .addTo(map.current);
       });
 
       map.current.on('mousemove', ['2018_emissions_outlines_cities', 'all_decades_emissions_fill'], (e, x) => {
@@ -229,8 +220,8 @@ function Map() {
           <div className="col-4">
             <div className="row">
               <div className="col-12">
-                <h2>Charts <img className='info-icon' src='/info-circle-black.svg' alt='chart-info' title='If no compare year is selected, each dot represents one census tract, mouseover said dot to highlight on the map. If a comparison year is selected, each arrow represents one census tract, beginning at the base year and ending at the comparison year, showing the change in % white population as well as change in emissions. A point moving down and to the left represents a census tract the is becoming less white and emmitting less over time'/>
-            </h2>
+                <h2>Charts <img className='info-icon' src='/info-circle-black.svg' alt='chart-info' title='If no compare year is selected, each dot represents one census tract, mouseover said dot to highlight on the map. If a comparison year is selected, each arrow represents one census tract, beginning at the base year and ending at the comparison year, showing the change in % white population as well as change in emissions. A point moving down and to the left represents a census tract the is becoming less white and emmitting less over time' />
+                </h2>
               </div>
             </div>
             <div className="row">
@@ -251,6 +242,89 @@ function Map() {
 
     </div>
   );
+}
+
+
+function createTooltipSvg(points, width, height, color, strokeWidth, xLabel, yLabel) {
+  console.log(points);
+
+  const r = 3;
+  const marginTop = 20; 
+  const marginRight = 30; 
+  const marginBottom = 30; 
+  const marginLeft = 40; 
+  const inset = r * 2; 
+  const insetTop = inset; 
+  const insetRight = inset; 
+  const insetBottom = inset; 
+  const insetLeft = inset; 
+  const xRange = [marginLeft + insetLeft, width - marginRight - insetRight];
+  const yRange = [height - marginBottom - insetBottom, marginTop + insetTop];
+  const X = points.map(x => x.x).sort();
+  const xExtent = d3.extent(points, function (d) { return d.x; });
+  const yExtent = d3.extent(points, function (d) { return d.y; });
+  const xScale = d3.scaleLinear(xExtent, xRange);
+  const yScale = d3.scaleLinear(yExtent, yRange);
+  const xAxis = d3.axisBottom(xScale).tickValues(X);
+  const yAxis = d3.axisLeft(yScale).ticks(height / 50);
+
+  const svg = d3.create("svg")
+    .attr("width", width)
+    .attr("height", height)
+    .attr("viewBox", [0, 0, width, height])
+    .attr("style", "max-width: 100%; height: auto; height: intrinsic;");
+
+  svg.append("g").attr("transform", `translate(${marginLeft},${marginTop})`)
+    .append("rect")
+    .attr("x", 0)
+    .attr("y", 0)
+    .attr("height", height - (marginBottom + marginTop))
+    .attr("width", width - (marginLeft + marginRight))
+    .style("fill", "#fff")
+
+  const line = d3.line()
+    .x(function (d) { return xScale(d.x); })
+    .y(function (d) { return yScale(d.y); });
+
+  svg.append('path')
+    .datum(points)
+    .attr('fill', 'none')
+    .attr('stroke', color)
+    .attr('stroke-width', strokeWidth)
+    .attr('d', line);
+
+  svg.append("g")
+    .attr("transform", `translate(0,${height - marginBottom})`)
+    .call(xAxis)
+    .call(g => g.select(".domain").remove())
+    .call(g => g.selectAll(".tick line").clone()
+      .attr("y2", marginTop + marginBottom - height)
+      .attr("stroke-opacity", 0.5))
+    .call(g => g.append("text")
+      .attr("x", width)
+      .attr("y", marginBottom - 4)
+      .attr("fill", "currentColor")
+      .attr("text-anchor", "end")
+      .text(xLabel));
+
+  svg.append("g")
+    .attr("transform", `translate(${marginLeft},0)`)
+    .call(yAxis)
+    .call(g => g.select(".domain").remove())
+    .call(g => g.selectAll(".tick line").clone()
+      .attr("x2", width - marginLeft - marginRight)
+      .attr("stroke-opacity", 0.1))
+    .call(g => g.append("text")
+      .attr("x", -marginLeft)
+      .attr("y", 10)
+      .attr("fill", "currentColor")
+      .attr("text-anchor", "start")
+      .text(yLabel));
+
+
+  const div = document.createElement('div');
+  div.appendChild(svg.node());
+  return div.innerHTML;
 }
 
 export default Map;

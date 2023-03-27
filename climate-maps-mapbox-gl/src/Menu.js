@@ -34,8 +34,8 @@ function Menu({ show, map, cityCordinates, setVariable, setCity, setYear, setCom
             setTimeout(() =>
                 onMenuClick(), 1000);
             setTimeout(() =>
-                onCityClick({target: {value: 'Cincinnati, OH--KY--IN'}}), 1500);
-            
+                onCityClick({ target: { value: 'Cincinnati, OH--KY--IN' } }), 1500);
+
         }
     });
     const onMenuClick = () => {
@@ -126,7 +126,10 @@ function Menu({ show, map, cityCordinates, setVariable, setCity, setYear, setCom
         }
         map.current.setFilter(layerName, ["has", property_key]);
         const prop_dist = property_dist_info[property_key]
-        let emissionsLegend = [<h6 className='subheading'>mean: {Math.round(prop_dist.mean)}, stdev: {Math.round(prop_dist.std)} </h6>, <div key="no-data"><span style={getBackgroundColor('#ffffff')}></span>No Data</div>];
+        let emissionsLegend = [
+            <h6 className='subheading'>mean: {Math.round(prop_dist.mean)}, stdev: {Math.round(prop_dist.std)} </h6>,
+            <div key="no-data"><span style={getBackgroundColor('#ffffff')}></span>No Data</div>
+        ];
 
         const groups = [-3, -2, -1, 0, 0.001, 1, 2, 3]
         const breaks = groups.map(function (p) {
@@ -241,7 +244,7 @@ function Menu({ show, map, cityCordinates, setVariable, setCity, setYear, setCom
             <div id="emissions-legend" className={`legend ${showLegend ? undefined : 'hide'}`}>
                 <div className="emissions-legend-title">
                     <h4>Legend </h4>
-                    <img className='info-icon' src='/info-circle.svg' alt='info' title='The neutral color is the mean of emissions for each decade and each new color is one additional standard deviation from mean. Past two stdevs the limit is set to the minimum or maximum value. Sometimes the mean value is not 0 in comparisons, keep that in mind when interpreting the map'/>
+                    <img className='info-icon' src='/info-circle.svg' alt='info' title='The neutral color is the mean of emissions for each decade and each new color is one additional standard deviation from mean. Past two stdevs the limit is set to the minimum or maximum value. Sometimes the mean value is not 0 in comparisons, keep that in mind when interpreting the map' />
                 </div>
                 <h6 className='subheading'>(In Kilograms of CO₂)</h6>
 

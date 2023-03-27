@@ -275,3 +275,14 @@ p {
 .info-icon:hover~.legend-tooltip {
   display: block
 }
+
+.map-popup {
+  width: 400px;
+  height: 270px;
+  max-width: 400px!important;
+  z-index: 1000;
+}
+
+.map-popup-title {
+  text-align: center;
+}
