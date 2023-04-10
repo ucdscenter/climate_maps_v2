@@ -511,7 +511,17 @@ function Scatterplot(data, {
                 .attr("cx", d => xScale(arrowData[d][0].x))
                 .attr("cy", d => yScale(arrowData[d][0].y))
                 .attr("r", r)
-                .attr("class", d => 'circle-' + arrowData[d][0].id);
+                .attr("class", d => 'circle-' + arrowData[d][0].id)
+                .on("mouseover", function (e, d) {
+                    mapHighlighter.highlightTract(d);
+                    d3.select("#trow-" + d).classed("selected_row", true);
+                    d3.select(this).classed("circle-selected", true).raise()
+                })
+                 .on("mouseout", function (e, d) {
+                    mapHighlighter.unhighlightTract();
+                    d3.select("#trow-" + d).classed("selected_row", false);
+                    d3.select(this).classed("circle-selected", false)
+                });
         }
 
     }
