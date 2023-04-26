@@ -182,16 +182,6 @@ Hopefully this data won't change, code should be in the devops folder.
 I lost the script to calculate property_dist_info.json, but its just the output of all the subsets of years and variables and differences distributions, so just pandas.describe stdev and mean.
 
 
-### To set up with nginx reverse proxy:
-Upcoming
-#### React Server
-#### Mbtiles Server
-
-### To set up with certbot certificate:
-Upcoming
-#### React Server
-#### Mbtiles Server
-
 
 ### Installing packages
 
