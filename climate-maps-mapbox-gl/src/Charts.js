@@ -33,7 +33,7 @@ function Charts({ variable, colorScale, hoveredTract, city, setCsv, year, compar
             isInitialRender.current = false;
             let cityState = city.split(',')
             if (cityState && cityState[0]) {
-                d3.csv(`${process.env.REACT_APP_BASE_URL}/data/chart_data/` + cityState[0] + `.csv`).then((data) => {
+                d3.csv(`${process.env.REACT_APP_BASE_URL}/a_data/chart_data/` + cityState[0] + `.csv`).then((data) => {
                     isInitialRender.current = false;
                     emissionsData.current[cityState[0]] = data
                     // emissionsData.current = data;

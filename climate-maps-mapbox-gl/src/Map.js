@@ -83,6 +83,7 @@ function Map() {
 
     map.current.on('load', () => {
       // Add a data source containing GeoJSON data.
+      console.log(process.env.REACT_APP_TILES_URL)
       map.current.addSource("2018_emissions", {
         type: "vector",
         tiles: [

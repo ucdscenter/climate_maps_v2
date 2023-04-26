@@ -28,8 +28,9 @@ to create the current mbtiles file we ran from the folder where all these exist:
 ### Mbtiles Server Deployment
 
 #### For running  tileserver locally
+`docker run --rm -it -v $(pwd):/data -p 8080:8080 maptiler/tileserver-gl `
+OR
 `docker run --rm -it -v $(pwd):/data -p 8080:80 maptiler/tileserver-gl `
-
 run docker/tileserver command from folder where mbtiles files are stored.
 https://github.com/maptiler/tileserver-gl
 
@@ -50,6 +51,124 @@ https://github.com/maptiler/tileserver-gl
 `aws s3 cp s3://mb-vector-tiles/no_maxtile_size.mbtiles no_maxtile_size.mbtiles`
 2. Copy the mbtiles file from s3 into the ec2 instance 
 `docker run -d --rm -it -v $(pwd):/data -p 8080:80 maptiler/tileserver-gl --mbtiles no_maxtile_size.mbtiles`
+
+
+### Building on single ec2 instance
+#### Docker mbtiles server
+1. Create ec2 instance,  Ubuntu, at least t2 small with minimum 32gb storage, make sure port 8080 is open for incoming traffic, or be prepared to route correctly. 
+2. Install docker, create folder where mbtiles file will be stored
+Install docker using the first choice instructions: https://docs.docker.com/engine/install/ubuntu/#install-using-the-convenience-script
+`mkdir mbtiles`
+
+
+3. Copy mbtile file from tippecanoe creation step into instance, either from s3:
+`aws s3 cp s3://mb-vector-tiles/no_maxtile_size.mbtiles no_maxtile_size.mbtiles`
+or local
+ `scp -i ../{ec2 key}.pem {path to mbtiles}.mbtiles ubuntu@{public ip}:/home/ubuntu/mbtiles`
+4. Run docker image in ec2 instance
+`cd mbtiles
+sudo docker run -d --rm -it -v $(pwd):/data -p 127.0.0.1:8080:8080 maptiler/tileserver-gl --mbtiles no_maxtile_size.mbtiles`
+#### Nginx & react site running
+
+0. Copy folder created from `npm run build` into ec2 instance in build folder
+in your .env file, make sure that your REACT_APP_TILES_URL is set to the ip or domain name of the instance you are hosting on. We alter nginx to forward all /data calls to the mbtiles server running at :8080. This works around the lack of localhost access in react native.
+`mkdir build`
+from local
+`scp -i {ec2 key}.pem -r climate-maps-mapbox-gl/build/* ubuntu@{public ip}:/home/ubuntu/build/`
+change permissions so folder can be accessed as project root by nginx;
+`sudo chmod 755 /home/`
+`sudo chmod 755 /home/ubuntu`
+1. Download nginx:
+`sudo apt-get install nginx`
+
+2. Open the nginx conf file
+`sudo vi /etc/nginx/sites-enabled/default`
+
+Copy in the following code, replacing the appropriate urls and root locations if not using certbot
+`server {
+        listen 80;
+        listen [::]:80;
+        root /home/ubuntu/build;
+        index index.html index.htm index.nginx-debian.html;
+        #server_name co2-map.modelofmodels.io www.co2-map.modelofmodels.io;
+        server_name _;
+        location /data {
+                proxy_pass http://127.0.0.1:8080;
+                proxy_set_header Host $http_host;
+                proxy_connect_timeout 10;
+                proxy_read_timeout 10;
+        }
+        location / {
+                try_files $uri /index.html;
+        }
+}`
+
+Copy in the following code, replacing the appropriate urls and root locations if using certbot
+`server {
+        root /home/ubuntu/build;
+        index index.html index.htm index.nginx-debian.html;
+        server_name co2-map.modelofmodels.io www.co2-map.modelofmodels.io;
+        #server_name _;
+        location /data {
+                proxy_pass http://127.0.0.1:8080;
+                proxy_set_header Host $http_host;
+                proxy_connect_timeout 10;
+                proxy_read_timeout 10;
+        }
+        location / {
+                try_files $uri /index.html;
+        }
+        listen [::]:443 ssl ipv6only=on; # managed by Certbot
+        listen 443 ssl; # managed by Certbot
+        ssl_certificate /etc/letsencrypt/live/co2-map.modelofmodels.io/fullchain.pem; # managed by Certbot
+        ssl_certificate_key /etc/letsencrypt/live/co2-map.modelofmodels.io/privkey.pem; # managed by Certbot
+        include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+        ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+}
+server {
+    if ($host = www.co2-map.modelofmodels.io) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+    if ($host = co2-map.modelofmodels.io) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+        listen 80;
+        listen [::]:80;
+        server_name co2-map.modelofmodels.io www.co2-map.modelofmodels.io;
+    return 404; # managed by Certbot
+}`
+
+
+#### Certbot Copy or Create
+1. in Route53 or whatever dns, route traffic from your domain name to whatever your server ip.
+Follow the following instructions to install and setup certbot. If you're creating a new cert then go past step #7.
+https://certbot.eff.org/instructions?ws=nginx&os=ubuntufocal
+
+2. If you are copying from an existing cert, just copy the full letsencrypt folder over and unzip to the right location:
+in the original server, zip letsencrypt files
+`sudo tar zpcvf backup_letsencrypt.tar.gz /etc/letsencrypt/`
+copy them to local
+`scp -r -i climatemaps-key.pem ubuntu@{old ip}:/home/ubuntu/backup_letsencrypt.tar.gz .
+`
+copy them to new server
+`scp -i backup_letsencrypt.tar.gz ubuntu@{new ip}:/home/ubuntu/
+`
+in new server, unzip to correct location
+`sudo tar zxvf backup_letsencrypt.tar.gz -C /`
+
+
+
+reroute traffic to the new ip
+
+test certbot is properly working with 
+`sudo certbot renew --dry-run`
+
+3. make sure that you update your .env file with so you can access 
+`REACT_APP_TILES_URL='https://{new url}'`
+Then rebuild and push 
+`npm run build`
+` scp -i ../../climatemaps-key.pem -r build/* ubuntu@{new ip}:/home/ubuntu/build`
+
 
 
 ### Generate calculations for cities
@@ -87,7 +206,7 @@ Create a `.env` file in the root directory
     REACT_APP_TILES_NAME='no_maxtile_size' * or name of mbtiles file being served
     REACT_APP_BASE_URL="".` Replace portnumber with the port your app is running in locally. Should be 3000 by default.
 
-## Available Scripts
+## Building & Running React app in npm
 
 In the project directory, you can run:
 
