@@ -90,7 +90,7 @@ Copy in the following code, replacing the appropriate urls and root locations if
         listen [::]:80;
         root /home/ubuntu/build;
         index index.html index.htm index.nginx-debian.html;
-        #server_name co2-map.modelofmodels.io www.co2-map.modelofmodels.io;
+        #server_name ***your url*** www.***your url***;
         server_name _;
         location /data {
                 proxy_pass http://127.0.0.1:8080;
@@ -107,7 +107,7 @@ Copy in the following code, replacing the appropriate urls and root locations if
 `server {
         root /home/ubuntu/build;
         index index.html index.htm index.nginx-debian.html;
-        server_name co2-map.modelofmodels.io www.co2-map.modelofmodels.io;
+        server_name ***your url*** www.***your url***;
         #server_name _;
         location /data {
                 proxy_pass http://127.0.0.1:8080;
@@ -120,21 +120,21 @@ Copy in the following code, replacing the appropriate urls and root locations if
         }
         listen [::]:443 ssl ipv6only=on; # managed by Certbot
         listen 443 ssl; # managed by Certbot
-        ssl_certificate /etc/letsencrypt/live/co2-map.modelofmodels.io/fullchain.pem; # managed by Certbot
-        ssl_certificate_key /etc/letsencrypt/live/co2-map.modelofmodels.io/privkey.pem; # managed by Certbot
+        ssl_certificate /etc/letsencrypt/live/***your url***/fullchain.pem; # managed by Certbot
+        ssl_certificate_key /etc/letsencrypt/live/***your url***/privkey.pem; # managed by Certbot
         include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
         ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
 }
 server {
-    if ($host = www.co2-map.modelofmodels.io) {
+    if ($host = www.***your url***) {
         return 301 https://$host$request_uri;
     } # managed by Certbot
-    if ($host = co2-map.modelofmodels.io) {
+    if ($host = ***your url***) {
         return 301 https://$host$request_uri;
     } # managed by Certbot
         listen 80;
         listen [::]:80;
-        server_name co2-map.modelofmodels.io www.co2-map.modelofmodels.io;
+        server_name ***your url*** www.***your url***;
     return 404; # managed by Certbot
 }`
 
@@ -148,7 +148,7 @@ https://certbot.eff.org/instructions?ws=nginx&os=ubuntufocal
 in the original server, zip letsencrypt files
 `sudo tar zpcvf backup_letsencrypt.tar.gz /etc/letsencrypt/`
 copy them to local
-`scp -r -i climatemaps-key.pem ubuntu@{old ip}:/home/ubuntu/backup_letsencrypt.tar.gz .
+`scp -r -i **your key** ubuntu@{old ip}:/home/ubuntu/backup_letsencrypt.tar.gz .
 `
 copy them to new server
 `scp -i backup_letsencrypt.tar.gz ubuntu@{new ip}:/home/ubuntu/
@@ -167,7 +167,7 @@ test certbot is properly working with
 `REACT_APP_TILES_URL='https://{new url}'`
 Then rebuild and push 
 `npm run build`
-` scp -i ../../climatemaps-key.pem -r build/* ubuntu@{new ip}:/home/ubuntu/build`
+` scp -i ../../**your key** -r build/* ubuntu@{new ip}:/home/ubuntu/build`
 
 
 
